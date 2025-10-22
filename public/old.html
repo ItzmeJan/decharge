@@ -1,0 +1,771 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>EV Charging DApp</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      padding: 20px;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    .header {
+      background: white;
+      border-radius: 15px;
+      padding: 25px;
+      margin-bottom: 20px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .header h1 {
+      color: #667eea;
+      font-size: 28px;
+    }
+
+    .wallet-info {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+    }
+
+    .btn {
+      padding: 12px 24px;
+      border: none;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+    }
+
+    .btn-secondary {
+      background: #e0e7ff;
+      color: #667eea;
+    }
+
+    .btn-danger {
+      background: #ef4444;
+      color: white;
+    }
+
+    .btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .card {
+      background: white;
+      border-radius: 15px;
+      padding: 25px;
+      margin-bottom: 20px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+    }
+
+    .card h2 {
+      color: #333;
+      margin-bottom: 15px;
+      font-size: 22px;
+    }
+
+    #map {
+      height: 400px;
+      border-radius: 10px;
+      margin-bottom: 20px;
+    }
+
+    .stations-list {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 15px;
+      max-height: 500px;
+      overflow-y: auto;
+    }
+
+    .station-card {
+      border: 2px solid #e5e7eb;
+      border-radius: 10px;
+      padding: 15px;
+      transition: all 0.3s;
+    }
+
+    .station-card:hover {
+      border-color: #667eea;
+      box-shadow: 0 5px 15px rgba(102, 126, 234, 0.2);
+    }
+
+    .station-card h3 {
+      color: #667eea;
+      font-size: 18px;
+      margin-bottom: 8px;
+    }
+
+    .station-status {
+      display: inline-block;
+      padding: 4px 12px;
+      border-radius: 12px;
+      font-size: 12px;
+      font-weight: 600;
+      margin-bottom: 10px;
+    }
+
+    .status-active {
+      background: #dcfce7;
+      color: #16a34a;
+    }
+
+    .status-maintenance {
+      background: #fef3c7;
+      color: #d97706;
+    }
+
+    .status-offline {
+      background: #fee2e2;
+      color: #dc2626;
+    }
+
+    .connectors {
+      margin-top: 10px;
+    }
+
+    .connector {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 8px;
+      background: #f9fafb;
+      border-radius: 6px;
+      margin-bottom: 5px;
+    }
+
+    .connector-status {
+      padding: 3px 8px;
+      border-radius: 8px;
+      font-size: 11px;
+      font-weight: 600;
+    }
+
+    .connector-available {
+      background: #dcfce7;
+      color: #16a34a;
+    }
+
+    .connector-occupied {
+      background: #fee2e2;
+      color: #dc2626;
+    }
+
+    .session-card {
+      border: 2px solid #667eea;
+      border-radius: 10px;
+      padding: 20px;
+      background: linear-gradient(135deg, #f0f4ff 0%, #e5eaff 100%);
+    }
+
+    .session-info {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 15px;
+      margin: 15px 0;
+    }
+
+    .info-item {
+      background: white;
+      padding: 12px;
+      border-radius: 8px;
+    }
+
+    .info-label {
+      font-size: 12px;
+      color: #666;
+      margin-bottom: 4px;
+    }
+
+    .info-value {
+      font-size: 20px;
+      font-weight: 700;
+      color: #667eea;
+    }
+
+    .history-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 15px;
+    }
+
+    .history-table th,
+    .history-table td {
+      padding: 12px;
+      text-align: left;
+      border-bottom: 1px solid #e5e7eb;
+    }
+
+    .history-table th {
+      background: #f9fafb;
+      font-weight: 600;
+      color: #667eea;
+    }
+
+    .history-table tr:hover {
+      background: #f9fafb;
+    }
+
+    .hidden {
+      display: none !important;
+    }
+
+    .loading {
+      text-align: center;
+      padding: 40px;
+      color: #666;
+    }
+
+    .spinner {
+      border: 3px solid #f3f3f3;
+      border-top: 3px solid #667eea;
+      border-radius: 50%;
+      width: 40px;
+      height: 40px;
+      animation: spin 1s linear infinite;
+      margin: 0 auto 15px;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    .alert {
+      padding: 15px;
+      border-radius: 8px;
+      margin-bottom: 15px;
+    }
+
+    .alert-success {
+      background: #dcfce7;
+      color: #16a34a;
+      border: 1px solid #16a34a;
+    }
+
+    .alert-error {
+      background: #fee2e2;
+      color: #dc2626;
+      border: 1px solid #dc2626;
+    }
+
+    .alert-info {
+      background: #e0f2fe;
+      color: #0284c7;
+      border: 1px solid #0284c7;
+    }
+
+    .token-balance {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: #dcfce7;
+      padding: 8px 16px;
+      border-radius: 8px;
+      font-weight: 600;
+      color: #16a34a;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>⚡ EV Charging DApp</h1>
+      <div class="wallet-info">
+        <div id="tokenBalance" class="token-balance hidden">
+          <span>🎁</span>
+          <span id="tokenAmount">0</span>
+          <span>Rewards</span>
+        </div>
+        <button id="connectWallet" class="btn btn-primary">Connect Wallet</button>
+        <div id="walletAddress" class="hidden"></div>
+      </div>
+    </div>
+
+    <div id="loginScreen">
+      <div class="card">
+        <h2>Welcome to EV Charging DApp</h2>
+        <p style="color: #666; margin-bottom: 20px;">Connect your Solana wallet to start charging your electric vehicle on our decentralized network.</p>
+        <button onclick="connectWallet()" class="btn btn-primary" style="width: 100%;">Connect Phantom Wallet</button>
+      </div>
+    </div>
+
+    <div id="mainApp" class="hidden">
+      <!-- Stations Map & List -->
+      <div class="card">
+        <h2>🗺️ Available Charging Stations</h2>
+        <div id="map"></div>
+        <div class="stations-list" id="stationsList"></div>
+      </div>
+
+      <!-- Active Session -->
+      <div id="activeSessionCard" class="card hidden">
+        <h2>⚡ Active Charging Session</h2>
+        <div class="session-card">
+          <div id="sessionDetails"></div>
+          <button onclick="endSession()" class="btn btn-danger" style="width: 100%; margin-top: 15px;">End Session & Pay</button>
+        </div>
+      </div>
+
+      <!-- History -->
+      <div class="card">
+        <h2>📊 Charging History</h2>
+        <div id="historyContent">
+          <div class="loading">
+            <div class="spinner"></div>
+            <p>Loading history...</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script>
+    // Simple base58 encode function
+    const BASE58_ALPHABET = '123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz';
+    
+    function base58Encode(buffer) {
+      const digits = [0];
+      for (let i = 0; i < buffer.length; i++) {
+        let carry = buffer[i];
+        for (let j = 0; j < digits.length; j++) {
+          carry += digits[j] << 8;
+          digits[j] = carry % 58;
+          carry = (carry / 58) | 0;
+        }
+        while (carry > 0) {
+          digits.push(carry % 58);
+          carry = (carry / 58) | 0;
+        }
+      }
+      
+      // Convert leading zeros
+      for (let i = 0; buffer[i] === 0 && i < buffer.length - 1; i++) {
+        digits.push(0);
+      }
+      
+      return digits.reverse().map(d => BASE58_ALPHABET[d]).join('');
+    }
+  </script>
+  <script>
+    const API_BASE = "https://tier-sustainable-feat-hey.trycloudflare.com"
+    let walletPublicKey = null;
+    let map = null;
+    let activeSessionInterval = null;
+
+    // Check if Phantom is installed
+    function getProvider() {
+      if ('phantom' in window) {
+        const provider = window.phantom?.solana;
+        if (provider?.isPhantom) {
+          return provider;
+        }
+      }
+      window.open('https://phantom.app/', '_blank');
+    }
+
+    // Connect wallet
+    async function connectWallet() {
+      try {
+        const provider = getProvider();
+        const resp = await provider.connect();
+        walletPublicKey = resp.publicKey.toString();
+        
+        document.getElementById('connectWallet').textContent = walletPublicKey.slice(0, 4) + '...' + walletPublicKey.slice(-4);
+        document.getElementById('loginScreen').classList.add('hidden');
+        document.getElementById('mainApp').classList.remove('hidden');
+        document.getElementById('tokenBalance').classList.remove('hidden');
+        
+        await loadTokenBalance();
+        await loadStations();
+        await checkActiveSession();
+        await loadHistory();
+        
+      } catch (err) {
+        console.error('Wallet connection failed:', err);
+        alert('Failed to connect wallet: ' + err.message);
+      }
+    }
+
+    // Sign message with wallet
+    async function signMessage(message) {
+      const provider = getProvider();
+      const encodedMessage = new TextEncoder().encode(message);
+      const signedMessage = await provider.signMessage(encodedMessage, 'utf8');
+      // Phantom returns signature as Uint8Array, convert to base58
+      return base58Encode(signedMessage.signature);
+    }
+
+    // Load token balance
+    async function loadTokenBalance() {
+      try {
+        // TODO: Query token balance from blockchain
+        // For now, show placeholder
+        document.getElementById('tokenAmount').textContent = '...';
+      } catch (err) {
+        console.error('Error loading token balance:', err);
+      }
+    }
+
+    // Load stations
+    async function loadStations() {
+      try {
+        const response = await fetch(`${API_BASE}/stations`);
+        const data = await response.json();
+        
+        displayStationsOnMap(data.charge_points);
+        displayStationsList(data.charge_points);
+      } catch (err) {
+        console.error('Error loading stations:', err);
+      }
+    }
+
+    // Display stations on map
+    function displayStationsOnMap(stations) {
+      if (!map) {
+        map = L.map('map').setView([20.5937, 78.9629], 5);
+        
+        L.tileLayer('https://tile.openfreemap.org/hot/{z}/{x}/{y}.png', {
+          attribution: '© OpenStreetMap contributors',
+          maxZoom: 19
+        }).addTo(map);
+      } else {
+        map.eachLayer(layer => {
+          if (layer instanceof L.Marker) {
+            map.removeLayer(layer);
+          }
+        });
+      }
+
+      stations.forEach(station => {
+        const marker = L.marker([station.location.latitude, station.location.longitude])
+          .addTo(map)
+          .bindPopup(`
+            <strong>${station.name}</strong><br>
+            ${station.location.address}<br>
+            Status: ${station.status}
+          `);
+      });
+    }
+
+    // Display stations list
+    function displayStationsList(stations) {
+      const container = document.getElementById('stationsList');
+      container.innerHTML = '';
+
+      stations.forEach(station => {
+        const statusClass = `status-${station.status}`;
+        const card = document.createElement('div');
+        card.className = 'station-card';
+        
+        let connectorsHTML = '';
+        station.connectors.forEach(connector => {
+          const connectorStatusClass = connector.status === 'available' ? 'connector-available' : 'connector-occupied';
+          connectorsHTML += `
+            <div class="connector">
+              <span>${connector.id} - ${connector.type} (${connector.power_kw}kW)</span>
+              <span class="connector-status ${connectorStatusClass}">${connector.status}</span>
+              ${connector.status === 'available' ? 
+                `<button class="btn btn-primary" style="padding: 6px 12px; font-size: 12px;" onclick="startCharging('${station.code}', '${connector.id}')">Start</button>` : 
+                ''}
+            </div>
+          `;
+        });
+
+        card.innerHTML = `
+          <h3>${station.name}</h3>
+          <span class="station-status ${statusClass}">${station.status}</span>
+          <p style="color: #666; font-size: 13px; margin: 8px 0;">${station.location.address}</p>
+          <p style="color: #333; font-size: 14px; margin: 8px 0;">
+            <strong>Pricing:</strong> ₹${station.pricing.energy_based.rate}/kWh, ₹${station.pricing.time_based.rate}/min
+          </p>
+          <div class="connectors">
+            ${connectorsHTML}
+          </div>
+        `;
+        
+        container.appendChild(card);
+      });
+    }
+
+    // Start charging
+    async function startCharging(stationCode, connectorId) {
+      try {
+        const provider = getProvider();
+        
+        // Get nonce
+        const nonceResp = await fetch(`${API_BASE}/nonce`);
+        const { nonce } = await nonceResp.json();
+        
+        // Sign nonce
+        const signature = await signMessage(nonce);
+        
+        // Start charge
+        const response = await fetch(`${API_BASE}/startCharge`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            publicKey: walletPublicKey,
+            signature,
+            nonce,
+            stationCode,
+            connectorId
+          })
+        });
+
+        const data = await response.json();
+        
+        if (data.success) {
+          alert('Charging session started!');
+          await loadStations();
+          await checkActiveSession();
+        } else {
+          alert('Error: ' + data.error);
+        }
+      } catch (err) {
+        console.error('Error starting charge:', err);
+        alert('Failed to start charging: ' + err.message);
+      }
+    }
+
+    // Check active session
+    async function checkActiveSession() {
+      try {
+        const response = await fetch(`${API_BASE}/monitor?pubkey=${walletPublicKey}`);
+        const data = await response.json();
+        
+        if (data.sessions && data.sessions.length > 0) {
+          const session = data.sessions[0];
+          displayActiveSession(session);
+          
+          // Start polling for updates
+          if (activeSessionInterval) clearInterval(activeSessionInterval);
+          activeSessionInterval = setInterval(checkActiveSession, 5000);
+        } else {
+          document.getElementById('activeSessionCard').classList.add('hidden');
+          if (activeSessionInterval) {
+            clearInterval(activeSessionInterval);
+            activeSessionInterval = null;
+          }
+        }
+      } catch (err) {
+        console.error('Error checking session:', err);
+      }
+    }
+
+    // Display active session
+    function displayActiveSession(session) {
+      document.getElementById('activeSessionCard').classList.remove('hidden');
+      
+      const minutes = Math.floor(session.timeElapsedSeconds / 60);
+      const seconds = session.timeElapsedSeconds % 60;
+      
+      const timeCost = (session.timeElapsedSeconds / 60) * session.pricing.time_based.rate;
+      const energyCost = session.kwhUsed * session.pricing.energy_based.rate;
+      const totalCost = timeCost + energyCost;
+      
+      document.getElementById('sessionDetails').innerHTML = `
+        <h3 style="color: #667eea; margin-bottom: 15px;">Station: ${session.stationCode} - ${session.connectorId}</h3>
+        <div class="session-info">
+          <div class="info-item">
+            <div class="info-label">Energy Used</div>
+            <div class="info-value">${session.kwhUsed.toFixed(2)} kWh</div>
+          </div>
+          <div class="info-item">
+            <div class="info-label">Time Elapsed</div>
+            <div class="info-value">${minutes}m ${seconds}s</div>
+          </div>
+          <div class="info-item">
+            <div class="info-label">Estimated Cost</div>
+            <div class="info-value">₹${totalCost.toFixed(2)}</div>
+          </div>
+          <div class="info-item">
+            <div class="info-label">Reward Tokens</div>
+            <div class="info-value">${Math.floor(session.kwhUsed)} 🎁</div>
+          </div>
+        </div>
+      `;
+    }
+
+    // End session
+    async function endSession() {
+  try {
+    if (!window.solanaWeb3) {
+      alert("Solana web3.js not loaded yet. Try again in a moment.");
+      return;
+    }
+
+    const response = await fetch(`${API_BASE}/monitor?pubkey=${walletPublicKey}`);
+    const data = await response.json();
+
+    if (!data.sessions || data.sessions.length === 0) {
+      alert('No active session found');
+      return;
+    }
+
+    const session = data.sessions[0];
+    const totalCostSOL = ((session.timeElapsedSeconds / 60) * session.pricing.time_based.rate +
+                          session.kwhUsed * session.pricing.energy_based.rate) / 100;
+
+    const confirmMsg = `Total Cost: ₹${totalCostSOL*100} (~${totalCostSOL.toFixed(4)} SOL)\nProceed with payment?`;
+    if (!confirm(confirmMsg)) return;
+
+    const provider = getProvider();
+    const connection = new window.solanaWeb3.Connection('https://api.devnet.solana.com');
+
+    const tx = new window.solanaWeb3.Transaction().add(
+      window.solanaWeb3.SystemProgram.transfer({
+        fromPubkey: provider.publicKey,
+        toPubkey: new window.solanaWeb3.PublicKey('C6rNnPKxXSTSWxdMH3ZWmZG7ZwXhPurPbUkGuyvtDzT4'),
+        lamports: Math.floor(totalCostSOL * 1e9)
+      })
+    );
+
+    tx.feePayer = provider.publicKey;
+    tx.recentBlockhash = (await connection.getLatestBlockhash()).blockhash;
+
+    // Sign transaction
+    const signedTx = await provider.signTransaction(tx);
+    const txSignature = await connection.sendRawTransaction(signedTx.serialize());
+    await connection.confirmTransaction(txSignature);
+
+    // Ensure txSignature is a base58 string
+    if (typeof txSignature !== 'string') {
+      alert('Invalid transaction signature!');
+      console.error('TX Signature:', txSignature);
+      return;
+    }
+
+    // End session on backend
+    const endResponse = await fetch(`${API_BASE}/endCharge`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        sessionId: session.id,
+        txSignature: txSignature // this must be a valid base58 string
+      })
+    });
+
+    const endData = await endResponse.json();
+
+    if (endData.success) {
+      alert(`Session ended! You earned ${endData.session.rewardTokens} reward tokens!`);
+      await loadStations();
+      await checkActiveSession();
+      await loadHistory();
+      await loadTokenBalance();
+    } else {
+      alert('Error ending session: ' + endData.error);
+    }
+
+  } catch (err) {
+    console.error('Error ending session:', err);
+    alert('Failed to end session: ' + err.message);
+  }
+}
+
+
+    // Load history
+    async function loadHistory() {
+      try {
+        const response = await fetch(`${API_BASE}/history?pubkey=${walletPublicKey}`);
+        const data = await response.json();
+        
+        const container = document.getElementById('historyContent');
+        
+        if (data.history.length === 0) {
+          container.innerHTML = '<p style="text-align: center; color: #666; padding: 40px;">No charging history yet</p>';
+          return;
+        }
+        
+        let tableHTML = `
+          <table class="history-table">
+            <thead>
+              <tr>
+                <th>Date</th>
+                <th>Station</th>
+                <th>Energy (kWh)</th>
+                <th>Cost (₹)</th>
+                <th>Rewards</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody>
+        `;
+        
+        data.history.forEach(record => {
+          const date = new Date(record.completedAt).toLocaleDateString();
+          tableHTML += `
+            <tr>
+              <td>${date}</td>
+              <td>${record.stationCode} - ${record.connectorId}</td>
+              <td>${record.kwhUsed.toFixed(2)}</td>
+              <td>₹${record.totalCost?.toFixed(2) || 'N/A'}</td>
+              <td>${record.rewardTokens || 0} 🎁</td>
+              <td>${record.status}</td>
+            </tr>
+          `;
+        });
+        
+        tableHTML += '</tbody></table>';
+        container.innerHTML = tableHTML;
+        
+      } catch (err) {
+        console.error('Error loading history:', err);
+      }
+    }
+
+    // Auto-connect if already authorized
+    window.addEventListener('load', async () => {
+      const provider = getProvider();
+      if (provider) {
+        try {
+          const resp = await provider.connect({ onlyIfTrusted: true });
+          if (resp.publicKey) {
+            await connectWallet();
+          }
+        } catch (err) {
+          // User not authorized yet
+        }
+      }
+    });
+
+    // Add Solana web3.js
+    const script = document.createElement('script');
+    script.src = 'https://unpkg.com/@solana/web3.js@latest/lib/index.iife.min.js';
+    document.head.appendChild(script);
+  </script>
+</body>
+</html>

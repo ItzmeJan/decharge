@@ -1,0 +1,592 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Panel - EV Charging DApp</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      padding: 20px;
+    }
+
+    .container {
+      max-width: 1400px;
+      margin: 0 auto;
+    }
+
+    .header {
+      background: white;
+      border-radius: 15px;
+      padding: 25px;
+      margin-bottom: 20px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .header h1 {
+      color: #667eea;
+      font-size: 28px;
+    }
+
+    .btn {
+      padding: 12px 24px;
+      border: none;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+    }
+
+    .btn-danger {
+      background: #ef4444;
+      color: white;
+      padding: 8px 16px;
+      font-size: 12px;
+    }
+
+    .btn-secondary {
+      background: #6b7280;
+      color: white;
+    }
+
+    .card {
+      background: white;
+      border-radius: 15px;
+      padding: 25px;
+      margin-bottom: 20px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+    }
+
+    .card h2 {
+      color: #333;
+      margin-bottom: 20px;
+      font-size: 22px;
+    }
+
+    .login-form {
+      max-width: 400px;
+      margin: 100px auto;
+    }
+
+    .form-group {
+      margin-bottom: 20px;
+    }
+
+    .form-group label {
+      display: block;
+      margin-bottom: 8px;
+      color: #333;
+      font-weight: 600;
+    }
+
+    .form-group input {
+      width: 100%;
+      padding: 12px;
+      border: 2px solid #e5e7eb;
+      border-radius: 8px;
+      font-size: 14px;
+    }
+
+    .form-group input:focus {
+      outline: none;
+      border-color: #667eea;
+    }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 20px;
+      margin-bottom: 30px;
+    }
+
+    .stat-card {
+      background: linear-gradient(135deg, #f0f4ff 0%, #e5eaff 100%);
+      padding: 20px;
+      border-radius: 10px;
+      text-align: center;
+    }
+
+    .stat-value {
+      font-size: 32px;
+      font-weight: 700;
+      color: #667eea;
+      margin-bottom: 8px;
+    }
+
+    .stat-label {
+      color: #666;
+      font-size: 14px;
+    }
+
+    .table-container {
+      overflow-x: auto;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 15px;
+    }
+
+    th, td {
+      padding: 12px;
+      text-align: left;
+      border-bottom: 1px solid #e5e7eb;
+    }
+
+    th {
+      background: #f9fafb;
+      font-weight: 600;
+      color: #667eea;
+    }
+
+    tr:hover {
+      background: #f9fafb;
+    }
+
+    .status-badge {
+      display: inline-block;
+      padding: 4px 12px;
+      border-radius: 12px;
+      font-size: 12px;
+      font-weight: 600;
+    }
+
+    .status-charging {
+      background: #dcfce7;
+      color: #16a34a;
+    }
+
+    .status-completed {
+      background: #dbeafe;
+      color: #0284c7;
+    }
+
+    .status-stopped {
+      background: #fee2e2;
+      color: #dc2626;
+    }
+
+    .hidden {
+      display: none !important;
+    }
+
+    .tabs {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 20px;
+      border-bottom: 2px solid #e5e7eb;
+    }
+
+    .tab {
+      padding: 12px 24px;
+      border: none;
+      background: none;
+      cursor: pointer;
+      font-size: 16px;
+      font-weight: 600;
+      color: #6b7280;
+      border-bottom: 3px solid transparent;
+      transition: all 0.3s;
+    }
+
+    .tab.active {
+      color: #667eea;
+      border-bottom-color: #667eea;
+    }
+
+    .refresh-btn {
+      padding: 8px 16px;
+      background: #e0e7ff;
+      color: #667eea;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 13px;
+    }
+
+    .pubkey {
+      font-family: monospace;
+      font-size: 12px;
+      color: #666;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <!-- Login Screen -->
+    <div id="loginScreen">
+      <div class="login-form card">
+        <h2>🔐 Admin Login</h2>
+        <form onsubmit="login(event)">
+          <div class="form-group">
+            <label>Username</label>
+            <input type="text" id="username" value="admin" required>
+          </div>
+          <div class="form-group">
+            <label>Password</label>
+            <input type="password" id="password" value="admin" required>
+          </div>
+          <button type="submit" class="btn btn-primary" style="width: 100%;">Login</button>
+        </form>
+      </div>
+    </div>
+
+    <!-- Admin Dashboard -->
+    <div id="adminDashboard" class="hidden">
+      <div class="header">
+        <h1>🛡️ Admin Dashboard</h1>
+        <button onclick="logout()" class="btn btn-secondary">Logout</button>
+      </div>
+
+      <!-- Stats -->
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-value" id="totalSessions">0</div>
+          <div class="stat-label">Total Sessions</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value" id="activeSessions">0</div>
+          <div class="stat-label">Active Sessions</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value" id="totalEnergy">0</div>
+          <div class="stat-label">Total kWh</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value" id="totalRevenue">₹0</div>
+          <div class="stat-label">Total Revenue</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value" id="totalRewards">0</div>
+          <div class="stat-label">Rewards Distributed</div>
+        </div>
+      </div>
+
+      <!-- Tabs -->
+      <div class="card">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+          <div class="tabs">
+            <button class="tab active" onclick="switchTab('active')">Active Sessions</button>
+            <button class="tab" onclick="switchTab('history')">History</button>
+          </div>
+          <button onclick="refreshData()" class="refresh-btn">🔄 Refresh</button>
+        </div>
+
+        <!-- Active Sessions Tab -->
+        <div id="activeTab">
+          <h2>⚡ Active Charging Sessions</h2>
+          <div class="table-container">
+            <table id="activeSessionsTable">
+              <thead>
+                <tr>
+                  <th>Session ID</th>
+                  <th>User</th>
+                  <th>Station</th>
+                  <th>Connector</th>
+                  <th>Energy (kWh)</th>
+                  <th>Time</th>
+                  <th>Est. Cost</th>
+                  <th>Status</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="activeSessionsBody">
+                <tr>
+                  <td colspan="9" style="text-align: center; color: #666; padding: 40px;">
+                    Loading...
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- History Tab -->
+        <div id="historyTab" class="hidden">
+          <h2>📊 Charging History</h2>
+          <div class="table-container">
+            <table id="historyTable">
+              <thead>
+                <tr>
+                  <th>Date</th>
+                  <th>Session ID</th>
+                  <th>User</th>
+                  <th>Station</th>
+                  <th>Energy (kWh)</th>
+                  <th>Duration</th>
+                  <th>Cost</th>
+                  <th>Rewards</th>
+                  <th>Payment TX</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody id="historyBody">
+                <tr>
+                  <td colspan="10" style="text-align: center; color: #666; padding: 40px;">
+                    Loading...
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const API_BASE = 'http://localhost:3000';
+    let currentTab = 'active';
+    let refreshInterval = null;
+
+    // Login
+    async function login(event) {
+      event.preventDefault();
+      
+      const username = document.getElementById('username').value;
+      const password = document.getElementById('password').value;
+
+      try {
+        const response = await fetch(`${API_BASE}/admin/login`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ username, password })
+        });
+
+        const data = await response.json();
+
+        if (data.success) {
+          document.getElementById('loginScreen').classList.add('hidden');
+          document.getElementById('adminDashboard').classList.remove('hidden');
+          await loadDashboardData();
+          
+          // Auto-refresh every 5 seconds
+          refreshInterval = setInterval(loadDashboardData, 5000);
+        } else {
+          alert('Invalid credentials');
+        }
+      } catch (err) {
+        console.error('Login error:', err);
+        alert('Login failed: ' + err.message);
+      }
+    }
+
+    // Logout
+    function logout() {
+      if (refreshInterval) {
+        clearInterval(refreshInterval);
+      }
+      document.getElementById('adminDashboard').classList.add('hidden');
+      document.getElementById('loginScreen').classList.remove('hidden');
+    }
+
+    // Switch tabs
+    function switchTab(tab) {
+      currentTab = tab;
+      
+      document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+      event.target.classList.add('active');
+      
+      if (tab === 'active') {
+        document.getElementById('activeTab').classList.remove('hidden');
+        document.getElementById('historyTab').classList.add('hidden');
+      } else {
+        document.getElementById('activeTab').classList.add('hidden');
+        document.getElementById('historyTab').classList.remove('hidden');
+      }
+    }
+
+    // Refresh data
+    async function refreshData() {
+      await loadDashboardData();
+    }
+
+    // Load dashboard data
+    async function loadDashboardData() {
+      try {
+        await Promise.all([
+          loadActiveSessions(),
+          loadHistory(),
+          updateStats()
+        ]);
+      } catch (err) {
+        console.error('Error loading dashboard:', err);
+      }
+    }
+
+    // Load active sessions
+    async function loadActiveSessions() {
+      try {
+        const response = await fetch(`${API_BASE}/admin/sessions`);
+        const data = await response.json();
+        
+        const activeSessions = data.sessions.filter(s => s.status === 'charging');
+        const tbody = document.getElementById('activeSessionsBody');
+        
+        if (activeSessions.length === 0) {
+          tbody.innerHTML = `
+            <tr>
+              <td colspan="9" style="text-align: center; color: #666; padding: 40px;">
+                No active sessions
+              </td>
+            </tr>
+          `;
+          return;
+        }
+        
+        tbody.innerHTML = activeSessions.map(session => {
+          const minutes = Math.floor(session.timeElapsedSeconds / 60);
+          const seconds = session.timeElapsedSeconds % 60;
+          const timeCost = (session.timeElapsedSeconds / 60) * session.pricing.time_based.rate;
+          const energyCost = session.kwhUsed * session.pricing.energy_based.rate;
+          const totalCost = timeCost + energyCost;
+          
+          return `
+            <tr>
+              <td class="pubkey">${session.id}</td>
+              <td class="pubkey">${session.publicKey.slice(0, 4)}...${session.publicKey.slice(-4)}</td>
+              <td>${session.stationCode}</td>
+              <td>${session.connectorId}</td>
+              <td>${session.kwhUsed.toFixed(2)}</td>
+              <td>${minutes}m ${seconds}s</td>
+              <td>₹${totalCost.toFixed(2)}</td>
+              <td><span class="status-badge status-charging">Charging</span></td>
+              <td>
+                <button class="btn btn-danger" onclick="stopSession('${session.id}')">
+                  Stop
+                </button>
+              </td>
+            </tr>
+          `;
+        }).join('');
+        
+      } catch (err) {
+        console.error('Error loading active sessions:', err);
+      }
+    }
+
+    // Load history
+    async function loadHistory() {
+      try {
+        const response = await fetch(`${API_BASE}/admin/history`);
+        const data = await response.json();
+        
+        const tbody = document.getElementById('historyBody');
+        
+        if (data.history.length === 0) {
+          tbody.innerHTML = `
+            <tr>
+              <td colspan="10" style="text-align: center; color: #666; padding: 40px;">
+                No history yet
+              </td>
+            </tr>
+          `;
+          return;
+        }
+        
+        tbody.innerHTML = data.history.slice().reverse().map(record => {
+          const date = new Date(record.completedAt).toLocaleString();
+          const duration = Math.floor(record.timeElapsedSeconds / 60) + 'm';
+          const statusClass = record.status === 'completed' ? 'status-completed' : 'status-stopped';
+          const paymentTx = record.paymentTx ? 
+            `<a href="https://explorer.solana.com/tx/${record.paymentTx}?cluster=devnet" target="_blank" style="color: #667eea;">${record.paymentTx.slice(0, 8)}...</a>` : 
+            'N/A';
+          
+          return `
+            <tr>
+              <td>${date}</td>
+              <td class="pubkey">${record.id}</td>
+              <td class="pubkey">${record.publicKey.slice(0, 4)}...${record.publicKey.slice(-4)}</td>
+              <td>${record.stationCode} - ${record.connectorId}</td>
+              <td>${record.kwhUsed.toFixed(2)}</td>
+              <td>${duration}</td>
+              <td>₹${record.totalCost?.toFixed(2) || 'N/A'}</td>
+              <td>${record.rewardTokens || 0} 🎁</td>
+              <td>${paymentTx}</td>
+              <td><span class="status-badge ${statusClass}">${record.status}</span></td>
+            </tr>
+          `;
+        }).join('');
+        
+      } catch (err) {
+        console.error('Error loading history:', err);
+      }
+    }
+
+    // Update stats
+    async function updateStats() {
+      try {
+        const [sessionsResp, historyResp] = await Promise.all([
+          fetch(`${API_BASE}/admin/sessions`),
+          fetch(`${API_BASE}/admin/history`)
+        ]);
+        
+        const sessionsData = await sessionsResp.json();
+        const historyData = await historyResp.json();
+        
+        const allSessions = [...Object.values(sessionsData.sessions), ...historyData.history];
+        const activeSessions = sessionsData.sessions.filter(s => s.status === 'charging');
+        
+        const totalEnergy = allSessions.reduce((sum, s) => sum + (s.kwhUsed || 0), 0);
+        const totalRevenue = historyData.history.reduce((sum, h) => sum + (h.totalCost || 0), 0);
+        const totalRewards = historyData.history.reduce((sum, h) => sum + (h.rewardTokens || 0), 0);
+        
+        document.getElementById('totalSessions').textContent = allSessions.length;
+        document.getElementById('activeSessions').textContent = activeSessions.length;
+        document.getElementById('totalEnergy').textContent = totalEnergy.toFixed(1);
+        document.getElementById('totalRevenue').textContent = '₹' + totalRevenue.toFixed(2);
+        document.getElementById('totalRewards').textContent = totalRewards;
+        
+      } catch (err) {
+        console.error('Error updating stats:', err);
+      }
+    }
+
+    // Stop session
+    async function stopSession(sessionId) {
+      if (!confirm('Are you sure you want to stop this charging session?')) {
+        return;
+      }
+      
+      try {
+        const response = await fetch(`${API_BASE}/admin/stopSession`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ sessionId })
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+          alert('Session stopped successfully');
+          await loadDashboardData();
+        } else {
+          alert('Error: ' + data.error);
+        }
+      } catch (err) {
+        console.error('Error stopping session:', err);
+        alert('Failed to stop session: ' + err.message);
+      }
+    }
+  </script>
+</body>
+</html>

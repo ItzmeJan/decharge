@@ -1,0 +1,24 @@
+{
+  "name": "decharge",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "dependencies": {
+    "@solana/spl-token": "^0.4.14",
+    "@solana/web3.js": "^1.98.4",
+    "body-parser": "^2.2.0",
+    "bs58": "^6.0.0",
+    "cors": "^2.8.5",
+    "express": "^5.1.0",
+    "path": "^0.12.7",
+    "tweetnacl": "^1.0.3",
+    "url": "^0.11.4"
+  }
+}

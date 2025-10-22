@@ -1,0 +1,1008 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>⚡ EV Charging DApp — Modern UI</title>
+
+<!-- Leaflet CSS -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+
+<style>
+  /* ---------- Base / Theme variables ---------- */
+  :root{
+    --accent-1: linear-gradient(135deg,#667eea,#764ba2);
+    --accent-2: linear-gradient(135deg,#ff7e5f,#feb47b);
+    --glass: rgba(255,255,255,0.12);
+  }
+  body { margin:0; font-family: "Inter", "Segoe UI", Roboto, system-ui, -apple-system; -webkit-font-smoothing:antialiased; -moz-osx-font-smoothing:grayscale; transition: background .35s, color .35s; }
+
+  /* Light / Dark */
+  body.light { --bg: #f2f6fb; --text:#0f172a; --card:#ffffff; --card-2:#f8fbff; --glass: rgba(255,255,255,0.6); }
+  body.dark  { --bg: #0f1224; --text:#f5f7fb; --card:#141423; --card-2:#161627; --glass: rgba(255,255,255,0.03); }
+
+  body { background: var(--bg); color: var(--text); height:100vh; overflow:hidden; }
+
+  /* ---------- Layout ---------- */
+  .app {
+    display:flex;
+    height:100vh;
+    width:100%;
+    position:relative;
+  }
+
+  /* Sidebar */
+  .sidebar {
+    width:60px;
+    min-width:60px;
+    background: var(--glass);
+    backdrop-filter: blur(8px);
+    border-top-right-radius:16px;
+    border-bottom-right-radius:16px;
+    display:flex; /* Visible by default on desktop */
+    flex-direction:column;
+    align-items:center;
+    padding:12px 8px;
+    gap:8px;
+    box-shadow: 4px 8px 30px rgba(2,6,23,0.12);
+    z-index:50;
+  }
+
+  .sidebar .icon-btn {
+    width:44px; height:44px; border-radius:50%;
+    border:none; cursor:pointer; 
+    display:flex; 
+    align-items:center; 
+    justify-content:center;
+    font-size:16px; color:#fff; background: rgba(255,255,255,0.06); position:relative; overflow:hidden;
+    transition: transform .22s ease, background .22s;
+    text-align:center;
+    line-height:1;
+  }
+  .sidebar .icon-btn:hover { transform: scale(1.07); background: rgba(255,255,255,0.12); }
+
+  /* ripple */
+  .ripple { position:absolute; border-radius:50%; transform:scale(0); animation:ripple .6s linear; background: rgba(255,255,255,0.45); pointer-events:none; }
+  @keyframes ripple { to { transform:scale(4); opacity:0; } }
+
+  /* Main area */
+  .main {
+    flex:1; display:flex; flex-direction:column; gap:14px; padding:18px; overflow:hidden;
+  }
+
+  /* top header row */
+  .header {
+    display:flex; align-items:center; justify-content:space-between; gap:12px;
+  }
+  .brand {
+    display:flex; align-items:center; gap:12px;
+  }
+  .brand .logo {
+    width:46px; height:46px; border-radius:12px; background:var(--accent-1); display:grid; place-items:center; color:#fff; font-weight:800; box-shadow:0 6px 18px rgba(102,126,234,.18);
+  }
+  .brand h1 { font-size:18px; letter-spacing:0.2px; margin:0; }
+  .header .controls { display:flex; align-items:center; gap:12px; }
+
+  .btn {
+    background:var(--accent-1); color:white; border:none; padding:10px 16px; border-radius:12px; cursor:pointer;
+    font-weight:700; letter-spacing:0.2px; transition: transform .16s, box-shadow .16s;
+  }
+  .btn.ghost { background:transparent; color:var(--text); border:1px solid rgba(0,0,0,0.06); }
+  .btn:active { transform:scale(.98); }
+  .small { padding:8px 12px; font-size:13px; border-radius:10px; }
+
+  /* layout content area: map + right column or stacked on mobile */
+  .content {
+    flex:1; display:flex; gap:16px; align-items:stretch; min-height:0; /* allow children to scroll */
+  }
+
+  /* Page sections for navigation */
+  .page-section {
+    display: none;
+    flex: 1;
+    flex-direction: column;
+    gap: 14px;
+    padding: 18px;
+    overflow: hidden;
+  }
+  .page-section.active {
+    display: flex;
+  }
+  .page-section.map-view {
+    display: flex;
+  }
+
+  /* map column */
+  .col-left {
+    flex: 1.6; min-width:280px; border-radius:16px; overflow:hidden; background:var(--card-2); box-shadow: 0 10px 30px rgba(2,6,23,0.06); position:relative;
+    display:flex; flex-direction:column; z-index:1;
+  }
+
+  #map { height:100%; min-height:360px; width:100%; }
+
+  /* right column (list + session + history) */
+  .col-right {
+    flex:1; min-width:320px; display:flex; flex-direction:column; gap:14px; max-height:calc(100vh - 180px);
+  }
+
+  .panel {
+    background:var(--card); border-radius:14px; padding:12px; box-shadow: 0 8px 22px rgba(2,6,23,0.06); overflow:auto;
+  }
+
+  .token-balance { display:inline-flex; align-items:center; gap:8px; padding:8px 12px; border-radius:12px; font-weight:700; background:linear-gradient(90deg,#e6ffef,#ddf7e6); color:#0b7a3f; }
+
+  /* stations list */
+  .stations-list { display:grid; grid-template-columns: 1fr; gap:10px; }
+  .station {
+    border-radius:12px; padding:12px; display:flex; flex-direction:column; gap:8px; background: linear-gradient(135deg,#ffffff,#f5fbff);
+    transition: transform .16s, box-shadow .16s;
+  }
+  body.dark .station { background: linear-gradient(135deg,#14141b,#1c1c2b); }
+  .station:hover { transform:translateY(-6px); box-shadow: 0 12px 30px rgba(20,32,80,0.06); cursor:pointer; }
+
+  .station .head { display:flex; justify-content:space-between; align-items:center; gap:8px; }
+  .station h3 { margin:0; font-size:15px; color:var(--text); }
+  .station .status { padding:6px 10px; border-radius:999px; font-weight:800; font-size:12px; }
+
+  /* connectors: high-contrast pills */
+  .connectors { display:flex; flex-direction:column; gap:8px; margin-top:6px; }
+  .connector-row { display:flex; justify-content:space-between; align-items:center; gap:8px; }
+  .connector-meta { font-size:13px; color:var(--text); font-weight:600; }
+  .connector-pill {
+    padding:7px 12px; border-radius:14px; font-weight:800; font-size:13px; min-width:86px; text-align:center;
+    color:#fff; box-shadow: 0 6px 18px rgba(0,0,0,0.08);
+  }
+  /* connector colors good contrast */
+  .available { background: linear-gradient(90deg,#0f9d58,#0fbf6f); color:#fff; }
+  .occupied  { background: linear-gradient(90deg,#ef4444,#ff6b6b); color:#fff; }
+  .maintenance { background: linear-gradient(90deg,#fbbf24,#fef08a); color:#1f2937; }
+
+  .connector-action {
+    border:none; padding:8px 12px; border-radius:12px; font-weight:800; cursor:pointer; min-width:90px;
+    transition: transform .12s;
+  }
+  .connector-action:active { transform:scale(.98); }
+
+  .start-btn { background: linear-gradient(90deg,#06b6d4,#3b82f6); color:#fff; box-shadow:0 8px 28px rgba(59,130,246,0.18); }
+  .stop-btn  { background: linear-gradient(90deg,#ef4444,#fb7185); color:#fff; }
+
+  /* History table responsive wrapper */
+  .history-wrapper { overflow-x:auto; }
+  table.history { width:100%; border-collapse:collapse; min-width:640px; }
+  table.history th, table.history td { padding:10px 12px; border-bottom:1px solid rgba(2,6,23,0.06); font-size:13px; text-align:left; }
+  body.dark table.history th, body.dark table.history td { border-bottom:1px solid rgba(255,255,255,0.04); }
+
+  /* ---------- Bottom sheet (station details) ---------- */
+  .sheet {
+    position:fixed; left:0; right:0; bottom:-100%; height:52vh; max-height:64vh; background:var(--card); border-top-left-radius:18px; border-top-right-radius:18px; box-shadow: 0 -20px 60px rgba(2,6,23,0.22);
+    transition: bottom .36s cubic-bezier(.2,.9,.3,1);
+    z-index:120;
+    padding:14px;
+    display:flex; flex-direction:column; gap:12px;
+  }
+  .sheet.open { bottom:0.5vh; }
+  .sheet .drag { width:56px; height:6px; background:rgba(0,0,0,0.08); border-radius:6px; margin:6px auto; }
+  .sheet .sheet-body { overflow:auto; padding:6px; display:flex; flex-direction:column; gap:12px; }
+
+  /* overlay when sidebar open or sheet open */
+  .overlay {
+    position:fixed; inset:0; background:rgba(2,6,23,0.35); opacity:0; pointer-events:none; transition:opacity .28s;
+    z-index:80;
+  }
+  .overlay.visible { opacity:1; pointer-events:auto; }
+
+  /* Floating menu toggle for mobile - hidden since sidebar is always visible */
+  .menu-toggle {
+    display: none;
+  }
+
+  /* theme toggle bottom-right (emoji only) */
+  .theme-toggle {
+    position:fixed; bottom:18px; right:18px; width:50px; height:50px; border-radius:50%; display:grid; place-items:center; font-size:20px; z-index:140;
+    background:var(--accent-2); color:#fff; box-shadow:0 12px 25px rgba(0,0,0,0.18); cursor:pointer;
+  }
+
+  /* Small screens adjustments */
+  @media (max-width: 900px){
+    .content { flex-direction:column; }
+    .col-left { min-height:320px; order:1; }
+    .col-right { order:2; max-height:unset; min-height:0; }
+    
+    /* Hide active session and history from main page on mobile */
+    .session-card { display:none !important; }
+    
+    /* Hide charging history panel on mobile */
+    .col-right .panel:last-of-type { display:none !important; }
+    
+    .sidebar { 
+      display:none; /* Hidden by default on mobile */
+      position:fixed; left:0; top:0; bottom:0; 
+      width:50px; min-width:50px;
+      padding:8px 6px; gap:6px;
+      z-index:180; /* Higher than toggle button */
+      transform: translateX(-50px);
+      transition: transform 0.3s ease;
+    }
+    .sidebar.visible {
+      display:flex;
+      transform: translateX(0);
+    }
+    .sidebar .icon-btn {
+      width:38px; height:38px;
+      font-size:14px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      text-align:center;
+      line-height:1;
+    }
+    .menu-toggle { 
+      display:grid; /* Show toggle button on mobile */
+      position:fixed; top:12px; left:12px; 
+      width:44px; height:44px; 
+      border-radius:50%; 
+      background:var(--glass); 
+      backdrop-filter: blur(8px);
+      box-shadow:0 6px 18px rgba(2,6,23,0.12); 
+      cursor:pointer;
+      z-index:160; /* Lower than navbar */
+      color:#fff;
+      font-size:18px;
+      border:none;
+      transition: transform 0.2s ease, background 0.2s;
+    }
+    .menu-toggle:hover {
+      transform: scale(1.05);
+      background: rgba(255,255,255,0.15);
+    }
+    .overlay { 
+      display:block;
+      z-index:150;
+    }
+  }
+
+  @media (min-width:901px){
+    .menu-toggle { display:none; }
+  }
+
+  /* small utility */
+  .muted { color:rgba(0,0,0,0.45); }
+  body.dark .muted { color:rgba(255,255,255,0.45); }
+
+  /* click bubble animation (for primary interactions) */
+  .bubble {
+    position:absolute; border-radius:50%; transform:scale(0); pointer-events:none; mix-blend-mode:screen; opacity:0.95;
+    animation:bubble-pop .48s ease-out;
+    background: radial-gradient(circle at 30% 30%, rgba(255,255,255,0.28), rgba(255,255,255,0.06));
+  }
+  @keyframes bubble-pop { to { transform:scale(3); opacity:0; } }
+
+</style>
+</head>
+<body class="light">
+  <div class="app">
+
+    <!-- Sidebar -->
+    <div class="sidebar" id="sidebar">
+      <button class="icon-btn" data-section="map" title="Map">🗺️</button>
+      <button class="icon-btn" data-section="session" title="Active">⚡</button>
+      <button class="icon-btn" data-section="history" title="History">📊</button>
+
+      <div style="flex:1"></div>
+
+      <button id="connectBtn" class="icon-btn" title="Connect Wallet">🔌</button>
+    </div>
+
+    <!-- overlay (used when mobile sidebar or bottom sheet open) -->
+    <div class="overlay" id="overlay"></div>
+
+    <!-- Floating menu (mobile) -->
+    <button class="menu-toggle" id="menuToggle" title="Menu">☰</button>
+
+    <!-- Main content -->
+    <div class="main">
+      <div class="header">
+        <div class="brand">
+          <div class="logo">EV</div>
+          <div>
+            <h1>EV Charging DApp</h1>
+            <div class="muted" style="font-size:13px">Decentralized charging network</div>
+          </div>
+        </div>
+
+        <div class="controls">
+          <div id="tokenBalance" class="token-balance" style="display:none">🎁 <span id="tokenAmount">0</span> Rewards</div>
+          <button id="quickConnect" class="btn small">Connect Phantom</button>
+        </div>
+      </div>
+
+      <!-- Map View (default) -->
+      <div class="page-section map-view active" id="mapSection">
+        <div class="content">
+          <!-- left: map -->
+          <div class="col-left">
+            <div id="map"></div>
+          </div>
+
+          <!-- right: list / session / history -->
+          <div class="col-right">
+            <!-- Stations list panel -->
+            <div class="panel" style="min-height:140px; max-height:42vh; overflow:auto;">
+              <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+                <h3 style="margin:0">Nearby Stations</h3>
+                <div class="muted" id="stationsCount">—</div>
+              </div>
+              <div class="stations-list" id="stationsList"></div>
+            </div>
+
+            <!-- Active session -->
+            <div class="panel session-card" id="activeSessionCard" style="display:none;">
+              <h3 style="margin-top:0">Active Charging Session</h3>
+              <div id="sessionDetails">No active session</div>
+              <div style="margin-top:12px; display:flex; gap:10px;">
+                <button class="btn stop-btn" id="endSessionBtn" style="flex:1; background:linear-gradient(90deg,#ef4444,#fb7185); color:#fff;">End Session & Pay</button>
+              </div>
+            </div>
+
+            <!-- History -->
+            <div class="panel" style="flex:1; overflow:auto;">
+              <h3 style="margin-top:0">Charging History</h3>
+              <div id="historyContent">
+                <div class="history-wrapper">
+                  <table class="history" id="historyTable">
+                    <thead><tr><th>Date</th><th>Station</th><th>Energy (kWh)</th><th>Cost (₹)</th><th>Rewards</th><th>Status</th></tr></thead>
+                    <tbody><tr><td colspan="6" class="muted">No history yet</td></tr></tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          </div> <!-- col-right -->
+        </div> <!-- content -->
+      </div> <!-- mapSection -->
+
+      <!-- Session View -->
+      <div class="page-section" id="sessionSection">
+        <div class="panel" style="flex:1; overflow:auto;">
+          <h3 style="margin-top:0">Active Charging Session</h3>
+          <div id="sessionDetailsFull">No active session</div>
+          <div style="margin-top:12px; display:flex; gap:10px;">
+            <button class="btn stop-btn" id="endSessionBtnFull" style="flex:1; background:linear-gradient(90deg,#ef4444,#fb7185); color:#fff;">End Session & Pay</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- History View -->
+      <div class="page-section" id="historySection">
+        <div class="panel" style="flex:1; overflow:auto;">
+          <h3 style="margin-top:0">Charging History</h3>
+          <div id="historyContentFull">
+            <div class="history-wrapper">
+              <table class="history" id="historyTableFull">
+                <thead><tr><th>Date</th><th>Station</th><th>Energy (kWh)</th><th>Cost (₹)</th><th>Rewards</th><th>Status</th></tr></thead>
+                <tbody><tr><td colspan="6" class="muted">No history yet</td></tr></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div> <!-- main -->
+
+    <!-- bottom sheet station details -->
+    <div class="sheet" id="sheet">
+      <div class="drag"></div>
+      <div style="display:flex; justify-content:space-between; align-items:center;">
+        <div>
+          <h3 id="sheetTitle" style="margin:0">Station name</h3>
+          <div class="muted" id="sheetAddr" style="font-size:13px">Address</div>
+        </div>
+        <div style="display:flex; gap:8px; align-items:center;">
+          <div id="sheetStatus" class="station-status muted">Status</div>
+          <button id="sheetClose" class="btn ghost small">Close</button>
+        </div>
+      </div>
+
+      <div class="sheet-body">
+        <div style="display:flex; gap:8px; align-items:center; justify-content:space-between;">
+          <div class="muted">Connectors</div>
+          <div class="muted" id="sheetPricing">Pricing</div>
+        </div>
+
+        <div id="sheetConnectors" style="display:flex; flex-direction:column; gap:10px;"></div>
+
+        <div style="display:flex; gap:10px; margin-top:6px;">
+          <button id="sheetStart" class="btn start-btn" style="flex:1; display:none;">Start Charging</button>
+          <button id="sheetStop"  class="btn stop-btn"  style="flex:1; display:none;">Stop Charging</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- theme toggle -->
+    <button class="theme-toggle" id="themeToggle" title="Toggle theme">🌓</button>
+  </div>
+
+<!-- Leaflet + Solana -->
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://unpkg.com/@solana/web3.js@latest/lib/index.iife.min.js"></script>
+
+<script>
+/* ===========================
+   Utilities & small effects
+   =========================== */
+
+function makeRipple(el, e){
+  const r = document.createElement('span'); r.className='ripple';
+  el.appendChild(r);
+  const rect = el.getBoundingClientRect();
+  r.style.left = ( (e?.clientX || rect.left + rect.width/2) - rect.left ) + 'px';
+  r.style.top  = ( (e?.clientY || rect.top + rect.height/2) - rect.top ) + 'px';
+  setTimeout(()=> r.remove(), 600);
+}
+function bubbleEffect(parent, x, y){
+  const b = document.createElement('span'); b.className='bubble';
+  b.style.left = x+'px'; b.style.top = y+'px';
+  parent.appendChild(b);
+  setTimeout(()=> b.remove(), 480);
+}
+
+/* Base58 encode (used for Phantom signature) */
+const BASE58_ALPHABET = '123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz';
+function base58Encode(buffer){
+  const digits = [0];
+  for (let i=0;i<buffer.length;i++){
+    let carry = buffer[i];
+    for (let j=0;j<digits.length;j++){
+      carry += digits[j] << 8;
+      digits[j] = carry % 58;
+      carry = (carry/58)|0;
+    }
+    while(carry>0){
+      digits.push(carry%58);
+      carry = (carry/58)|0;
+    }
+  }
+  // leading zeros
+  for (let k=0; k<buffer.length-1 && buffer[k]===0; k++){
+    digits.push(0);
+  }
+  return digits.reverse().map(d => BASE58_ALPHABET[d]).join('');
+}
+
+/* ===========================
+   State & API config
+   =========================== */
+const API_BASE = "https://tier-sustainable-feat-hey.trycloudflare.com"; // adjust if needed
+let walletPublicKey = null;
+let map = null;
+let markers = [];
+let selectedStation = null;
+let activeSessionInterval = null;
+
+/* DOM references */
+const overlay = document.getElementById('overlay');
+const sidebar = document.getElementById('sidebar');
+const menuToggle = document.getElementById('menuToggle');
+const themeToggle = document.getElementById('themeToggle');
+const connectBtn = document.getElementById('connectBtn');
+const quickConnect = document.getElementById('quickConnect');
+const tokenBalanceEl = document.getElementById('tokenBalance');
+const tokenAmountEl = document.getElementById('tokenAmount');
+const stationsListEl = document.getElementById('stationsList');
+const stationsCountEl = document.getElementById('stationsCount');
+const sheet = document.getElementById('sheet');
+const sheetTitle = document.getElementById('sheetTitle');
+const sheetAddr = document.getElementById('sheetAddr');
+const sheetStatus = document.getElementById('sheetStatus');
+const sheetConnectors = document.getElementById('sheetConnectors');
+const sheetPricing = document.getElementById('sheetPricing');
+const sheetClose = document.getElementById('sheetClose');
+const sheetStart = document.getElementById('sheetStart');
+const sheetStop = document.getElementById('sheetStop');
+const activeSessionCard = document.getElementById('activeSessionCard');
+const sessionDetails = document.getElementById('sessionDetails');
+const endSessionBtn = document.getElementById('endSessionBtn');
+const historyTbody = document.querySelector('#historyTable tbody');
+const sessionDetailsFull = document.getElementById('sessionDetailsFull');
+const endSessionBtnFull = document.getElementById('endSessionBtnFull');
+const historyTbodyFull = document.querySelector('#historyTableFull tbody');
+
+/* ---------- UI interactions: sidebar + menu toggle + overlay ---------- */
+let sidebarTimeout = null;
+
+function openSidebar(){
+  sidebar.classList.add('visible'); 
+  overlay.classList.add('visible');
+  
+  // Clear any existing timeout
+  if (sidebarTimeout) {
+    clearTimeout(sidebarTimeout);
+  }
+  
+  // Auto-hide after 6 seconds
+  sidebarTimeout = setTimeout(() => {
+    closeSidebar();
+  }, 6000);
+}
+
+function closeSidebar(){
+  sidebar.classList.remove('visible'); 
+  overlay.classList.remove('visible');
+  
+  // Clear timeout when manually closed
+  if (sidebarTimeout) {
+    clearTimeout(sidebarTimeout);
+    sidebarTimeout = null;
+  }
+}
+
+menuToggle.addEventListener('click', (e)=>{
+  const visible = sidebar.classList.contains('visible');
+  if(visible) closeSidebar(); else openSidebar();
+});
+
+overlay.addEventListener('click', ()=>{
+  closeSidebar(); 
+  closeSheet();
+});
+
+/* ripple on sidebar icons */
+document.querySelectorAll('.sidebar .icon-btn').forEach(btn=>{
+  btn.addEventListener('click', (e)=>{
+    makeRipple(btn, e);
+    const section = btn.dataset.section;
+    switchSection(section);
+    // Close sidebar on mobile after navigation
+    if(window.innerWidth < 901) {
+      setTimeout(()=> closeSidebar(), 250);
+    }
+  });
+  
+  // Reset auto-hide timer when hovering over sidebar buttons
+  btn.addEventListener('mouseenter', () => {
+    if (sidebarTimeout) {
+      clearTimeout(sidebarTimeout);
+      // Restart the timer
+      sidebarTimeout = setTimeout(() => {
+        closeSidebar();
+      }, 6000);
+    }
+  });
+});
+
+/* header connect buttons */
+connectBtn.addEventListener('click', ()=> connectWallet());
+quickConnect.addEventListener('click', ()=> connectWallet());
+
+/* theme toggle */
+themeToggle.addEventListener('click', ()=>{
+  document.body.classList.toggle('light');
+  document.body.classList.toggle('dark');
+});
+
+/* ---------- Map initialization ---------- */
+function initMap(){
+  if(map) return;
+  map = L.map('map', { zoomControl: false }).setView([20.5937,78.9629], 5);
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '© OpenStreetMap contributors'
+  }).addTo(map);
+  // small zoom control position
+  L.control.zoom({ position: 'bottomright' }).addTo(map);
+}
+
+/* ---------- Stations display ---------- */
+async function loadStations(){
+  try{
+    const resp = await fetch(`${API_BASE}/stations`);
+    const data = await resp.json();
+    const stations = data.charge_points || [];
+    renderStationsList(stations);
+    renderStationsMap(stations);
+    stationsCountEl.textContent = `${stations.length} found`;
+  }catch(e){
+    console.error('loadStations', e);
+  }
+}
+
+function clearMarkers(){
+  markers.forEach(m => m.remove());
+  markers = [];
+}
+
+function renderStationsMap(stations){
+  initMap();
+  clearMarkers();
+  stations.forEach(st => {
+    const marker = L.marker([st.location.latitude, st.location.longitude]).addTo(map);
+    marker.bindPopup(`<strong>${st.name}</strong><br>${st.location.address}<br>Status: ${st.status}`);
+    marker.on('click', ()=> {
+      openSheetForStation(st);
+    });
+    markers.push(marker);
+  });
+}
+
+function renderStationsList(stations){
+  stationsListEl.innerHTML = '';
+  stations.forEach(st => {
+    const el = document.createElement('div'); el.className = 'station';
+    const statusClass = st.status === 'active' ? 'status-active' : (st.status==='maintenance' ? 'status-maintenance' : 'status-offline');
+    el.innerHTML = `
+      <div class="head">
+        <div>
+          <h3>${st.name}</h3>
+          <div class="muted" style="font-size:12px">${st.location.address}</div>
+        </div>
+        <div style="display:flex; flex-direction:column; align-items:flex-end; gap:6px;">
+          <div class="status ${statusClass}" style="padding:6px 10px; border-radius:999px; font-weight:800; font-size:12px;">${st.status}</div>
+          <div class="muted" style="font-size:12px">₹${st.pricing.energy_based.rate}/kWh</div>
+        </div>
+      </div>
+      <div style="display:flex; gap:8px; margin-top:6px; align-items:center;">
+        <div style="flex:1; display:flex; gap:6px; flex-wrap:wrap;">
+          ${st.connectors.slice(0,3).map(c => `<div style="padding:6px 10px; border-radius:10px; font-weight:700; font-size:12px; background:rgba(0,0,0,0.04)">${c.type} ${c.power_kw}kW</div>`).join('')}
+        </div>
+        <button class="btn small" style="min-width:98px" data-code="${st.code}">Details</button>
+      </div>
+    `;
+    // click station card => open sheet
+    el.querySelector('button').addEventListener('click', (ev)=>{
+      makeRipple(ev.target, ev);
+      openSheetForStation(st);
+    });
+    // bubble effect on primary area
+    el.addEventListener('click', (e)=>{
+      const rect = el.getBoundingClientRect();
+      bubbleEffect(el, e.clientX - rect.left, e.clientY - rect.top);
+    });
+
+    stationsListEl.appendChild(el);
+  });
+}
+
+/* ---------- bottom sheet handling ---------- */
+function openSheetForStation(station){
+  selectedStation = station;
+  sheetTitle.textContent = station.name;
+  sheetAddr.textContent = station.location.address;
+  sheetStatus.textContent = station.status;
+  sheetStatus.className = 'station-status ' + (station.status==='active' ? 'status-active' : station.status==='maintenance' ? 'status-maintenance' : 'status-offline');
+  sheetPricing.textContent = `₹${station.pricing.energy_based.rate}/kWh • ₹${station.pricing.time_based.rate}/min`;
+  sheetConnectors.innerHTML = '';
+
+  station.connectors.forEach(conn => {
+    const row = document.createElement('div'); row.className = 'connector-row';
+    const meta = document.createElement('div'); meta.className = 'connector-meta';
+    meta.innerHTML = `${conn.id} • ${conn.type} • ${conn.power_kw}kW`;
+
+    const pill = document.createElement('div'); pill.className = 'connector-pill';
+    if (conn.status === 'available'){ pill.classList.add('available'); pill.textContent = 'AVAILABLE'; }
+    else if (conn.status === 'occupied'){ pill.classList.add('occupied'); pill.textContent = 'OCCUPIED'; }
+    else { pill.classList.add('maintenance'); pill.textContent = 'MAINTENANCE'; }
+
+    const action = document.createElement('button'); action.className = 'connector-action';
+    action.style.fontWeight = 800;
+    if (conn.status === 'available'){
+      action.classList.add('start-btn');
+      action.textContent = 'Start';
+      action.addEventListener('click', async (ev)=>{
+        makeRipple(action, ev);
+        await startCharging(station.code, conn.id);
+        // quick UI refresh
+        await loadStations();
+        closeSheet();
+      });
+    } else {
+      action.classList.add('stop-btn');
+      action.textContent = '—';
+      action.disabled = true;
+      action.style.opacity = 0.6;
+    }
+
+    const container = document.createElement('div');
+    container.style.display = 'flex'; container.style.alignItems='center'; container.style.gap='10px';
+    container.appendChild(pill);
+    container.appendChild(action);
+
+    row.appendChild(meta);
+    row.appendChild(container);
+    sheetConnectors.appendChild(row);
+  });
+
+  sheet.classList.add('open'); overlay.classList.add('visible');
+}
+
+/* close sheet */
+function closeSheet(){
+  sheet.classList.remove('open'); overlay.classList.remove('visible');
+}
+sheetClose.addEventListener('click', closeSheet);
+
+/* ---------- Connect wallet + sign message ---------- */
+function getProvider(){
+  if (window.phantom && window.phantom.solana && window.phantom.solana.isPhantom) return window.phantom.solana;
+  if (window.solana && window.solana.isPhantom) return window.solana;
+  // open phantom landing if not installed
+  window.open('https://phantom.app/', '_blank');
+  return null;
+}
+
+async function connectWallet(){
+  try{
+    const provider = getProvider();
+    if (!provider) throw new Error('Phantom not found');
+    const res = await provider.connect();
+    walletPublicKey = res.publicKey.toString();
+    document.getElementById('connectBtn').textContent = '✓';
+    document.getElementById('quickConnect').textContent = walletPublicKey.slice(0,6) + '...' + walletPublicKey.slice(-4);
+    tokenBalanceEl.style.display = 'inline-flex';
+    // load user-specific data
+    await loadTokenBalance();
+    await loadStations();
+    await checkActiveSession();
+    await loadHistory();
+  }catch(err){
+    console.error('connectWallet', err);
+    alert('Wallet connect failed: ' + (err.message||err));
+  }
+}
+
+/* sign message (nonce) -> base58 signature */
+async function signMessage(message){
+  const provider = getProvider();
+  if (!provider) throw new Error('Wallet provider missing');
+  const encoded = new TextEncoder().encode(message);
+  const signed = await provider.signMessage(encoded, 'utf8'); // returns { signature: Uint8Array }
+  return base58Encode(signed.signature);
+}
+
+/* ---------- Start/End charging ---------- */
+async function startCharging(stationCode, connectorId){
+  try{
+    if (!walletPublicKey) { alert('Connect wallet first'); return; }
+    // get nonce
+    const nres = await fetch(`${API_BASE}/nonce`);
+    const ndata = await nres.json();
+    const nonce = ndata.nonce;
+    // sign
+    const signature = await signMessage(nonce);
+    // post to startCharge
+    const resp = await fetch(`${API_BASE}/startCharge`, {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({ publicKey: walletPublicKey, signature, nonce, stationCode, connectorId })
+    });
+    const data = await resp.json();
+    if (data.success){
+      alert('Charging session started!');
+    } else {
+      alert('Error: ' + (data.error || 'unknown'));
+    }
+  }catch(err){
+    console.error('startCharging', err);
+    alert('Failed to start charging: ' + (err.message||err));
+  }
+}
+
+async function checkActiveSession(){
+  try{
+    if (!walletPublicKey) return;
+    const resp = await fetch(`${API_BASE}/monitor?pubkey=${walletPublicKey}`);
+    const data = await resp.json();
+    if (data.sessions && data.sessions.length > 0){
+      const session = data.sessions[0];
+      renderActiveSession(session);
+      if (activeSessionInterval) clearInterval(activeSessionInterval);
+      activeSessionInterval = setInterval(checkActiveSession, 4000);
+    } else {
+      activeSessionCard.style.display = 'none';
+      if(activeSessionInterval){ clearInterval(activeSessionInterval); activeSessionInterval = null; }
+    }
+  }catch(err){ console.error('checkActiveSession', err); }
+}
+
+function renderActiveSession(s){
+  // Only show active session card if we're not on the session page
+  const currentSection = document.querySelector('.page-section.active');
+  if (currentSection && currentSection.id !== 'sessionSection') {
+    activeSessionCard.style.display = 'block';
+  }
+  
+  const mins = Math.floor(s.timeElapsedSeconds/60), secs = s.timeElapsedSeconds % 60;
+  const timeCost = (s.timeElapsedSeconds/60) * s.pricing.time_based.rate;
+  const energyCost = s.kwhUsed * s.pricing.energy_based.rate;
+  const total = timeCost + energyCost;
+  const sessionHTML = `
+    <div style="display:grid; grid-template-columns:repeat(2,1fr); gap:10px;">
+      <div style="background:var(--card-2); padding:10px; border-radius:10px;">
+        <div class="muted">Energy Used</div><div style="font-weight:800; font-size:18px">${s.kwhUsed.toFixed(2)} kWh</div>
+      </div>
+      <div style="background:var(--card-2); padding:10px; border-radius:10px;">
+        <div class="muted">Time</div><div style="font-weight:800; font-size:18px">${mins}m ${secs}s</div>
+      </div>
+      <div style="background:var(--card-2); padding:10px; border-radius:10px;">
+        <div class="muted">Estimated Cost</div><div style="font-weight:800; font-size:18px">₹${total.toFixed(2)}</div>
+      </div>
+      <div style="background:var(--card-2); padding:10px; border-radius:10px;">
+        <div class="muted">Rewards</div><div style="font-weight:800; font-size:18px">${Math.floor(s.kwhUsed)} 🎁</div>
+      </div>
+    </div>
+  `;
+  sessionDetails.innerHTML = sessionHTML;
+  // Also update the full view if it exists
+  if (sessionDetailsFull) {
+    sessionDetailsFull.innerHTML = sessionHTML;
+    endSessionBtnFull.style.display = 'block';
+  }
+}
+
+/* End session (payment via Solana) */
+endSessionBtn.addEventListener('click', endSession);
+endSessionBtnFull.addEventListener('click', endSession);
+
+async function endSession(){
+  try{
+    if (!walletPublicKey) { alert('Connect wallet first'); return; }
+    // fetch current session
+    const resp = await fetch(`${API_BASE}/monitor?pubkey=${walletPublicKey}`);
+    const data = await resp.json();
+    if (!data.sessions || data.sessions.length === 0){ alert('No active session'); return; }
+    const session = data.sessions[0];
+    const timeCost = (session.timeElapsedSeconds/60) * session.pricing.time_based.rate;
+    const energyCost = session.kwhUsed * session.pricing.energy_based.rate;
+    const totalCost = timeCost + energyCost;
+    const totalSOL = totalCost / 100; // simplified conversion — adjust as you want
+
+    if (!confirm(`Total Cost: ₹${totalCost.toFixed(2)} (~${totalSOL.toFixed(4)} SOL)\nProceed with payment?`)) return;
+
+    const provider = getProvider();
+    if (!provider) throw new Error('Phantom not available');
+
+    // build transaction — replace server wallet below if necessary
+    const serverWallet = new window.solanaWeb3.PublicKey('C6rNnPKxXSTSWxdMH3ZWmZG7ZwXhPurPbUkGuyvtDzT4');
+
+    const connection = new window.solanaWeb3.Connection('https://api.devnet.solana.com');
+    const tx = new window.solanaWeb3.Transaction().add(
+      window.solanaWeb3.SystemProgram.transfer({
+        fromPubkey: provider.publicKey,
+        toPubkey: serverWallet,
+        lamports: Math.floor(totalSOL * 1e9)
+      })
+    );
+
+    tx.feePayer = provider.publicKey;
+    tx.recentBlockhash = (await connection.getLatestBlockhash()).blockhash;
+
+    const signed = await provider.signTransaction(tx);
+    const txSig = await connection.sendRawTransaction(signed.serialize());
+    await connection.confirmTransaction(txSig);
+
+    // ensure base58 string (it should be)
+    if (typeof txSig !== 'string') {
+      console.error('txSig not string', txSig);
+      alert('Payment failed (invalid tx signature).');
+      return;
+    }
+
+    // call backend to end session (pass txSig)
+    const endResp = await fetch(`${API_BASE}/endCharge`, {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ sessionId: session.id, txSignature: txSig })
+    });
+    const endData = await endResp.json();
+    if (endData.success){
+      alert(`Session ended! You earned ${endData.session.rewardTokens} reward tokens!`);
+      await loadStations();
+      await checkActiveSession();
+      await loadHistory();
+      await loadTokenBalance();
+    } else {
+      alert('Error ending session: ' + (endData.error || 'unknown'));
+    }
+  }catch(err){
+    console.error('endSession', err);
+    alert('Failed to end session: ' + (err.message || err));
+  }
+}
+
+/* ---------- History + token balance ---------- */
+async function loadHistory(){
+  try{
+    if (!walletPublicKey) return;
+    const resp = await fetch(`${API_BASE}/history?pubkey=${walletPublicKey}`);
+    const data = await resp.json();
+    const history = data.history || [];
+    historyTbody.innerHTML = '';
+    if (history.length === 0){
+      historyTbody.innerHTML = '<tr><td colspan="6" class="muted">No charging history yet</td></tr>';
+      // Also update full view
+      if (historyTbodyFull) {
+        historyTbodyFull.innerHTML = '<tr><td colspan="6" class="muted">No charging history yet</td></tr>';
+      }
+      return;
+    }
+    history.forEach(r => {
+      const date = new Date(r.completedAt).toLocaleDateString();
+      const tr = document.createElement('tr');
+      tr.innerHTML = `<td>${date}</td><td>${r.stationCode} - ${r.connectorId}</td><td>${r.kwhUsed.toFixed(2)}</td><td>₹${(r.totalCost||0).toFixed(2)}</td><td>${r.rewardTokens||0} 🎁</td><td>${r.status}</td>`;
+      historyTbody.appendChild(tr);
+    });
+    // Also update full view
+    if (historyTbodyFull) {
+      historyTbodyFull.innerHTML = historyTbody.innerHTML;
+    }
+  }catch(err){ console.error('loadHistory', err); }
+}
+
+async function loadTokenBalance(){
+  try{
+    // TODO: query token balance from chain, token program etc.
+    tokenAmountEl.textContent = '...';
+    tokenBalanceEl.style.display = 'inline-flex';
+  }catch(err){ console.error('loadTokenBalance', err); }
+}
+
+/* ---------- small helpers ---------- */
+function switchSection(name){
+  // Hide all page sections
+  document.querySelectorAll('.page-section').forEach(s=> s.classList.remove('active'));
+  
+  if (name === 'map') {
+    document.getElementById('mapSection').classList.add('active');
+    // Show active session card in map view
+    if (activeSessionCard) {
+      activeSessionCard.style.display = activeSessionCard.style.display === 'none' ? 'none' : 'block';
+    }
+  } else if (name === 'session'){
+    document.getElementById('sessionSection').classList.add('active');
+    // Hide active session card in map view to avoid duplication
+    if (activeSessionCard) {
+      activeSessionCard.style.display = 'none';
+    }
+    // Update session details in the full view
+    updateSessionDetailsFull();
+  } else if (name === 'history'){
+    document.getElementById('historySection').classList.add('active');
+    // Show active session card in map view
+    if (activeSessionCard) {
+      activeSessionCard.style.display = activeSessionCard.style.display === 'none' ? 'none' : 'block';
+    }
+    // Update history in the full view
+    updateHistoryFull();
+  }
+}
+
+/* Update session details in full view */
+function updateSessionDetailsFull(){
+  if (activeSessionCard.style.display === 'none') {
+    sessionDetailsFull.innerHTML = '<div class="muted">No active charging session</div>';
+    endSessionBtnFull.style.display = 'none';
+  } else {
+    sessionDetailsFull.innerHTML = sessionDetails.innerHTML;
+    endSessionBtnFull.style.display = 'block';
+  }
+}
+
+/* Update history in full view */
+function updateHistoryFull(){
+  historyTbodyFull.innerHTML = historyTbody.innerHTML;
+}
+
+/* ---------- startup ---------- */
+window.addEventListener('load', async ()=>{
+  initMap();
+  await loadStations();
+  // try silent connect if trusted
+  try {
+    const provider = getProvider();
+    if (provider) {
+      const resp = await provider.connect({ onlyIfTrusted: true }).catch(()=>null);
+      if (resp && resp.publicKey) { walletPublicKey = resp.publicKey.toString(); document.getElementById('quickConnect').textContent = walletPublicKey.slice(0,6)+'...'+walletPublicKey.slice(-4); await loadTokenBalance(); await checkActiveSession(); await loadHistory(); }
+    }
+  }catch(e){ console.warn(e); }
+});
+
+/* Sidebar is now always visible, no resize handling needed */
+
+</script>
+</body>
+</html>

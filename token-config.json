@@ -1,0 +1,9 @@
+{
+  "tokenMint": "BbJz98qeUBLAkH5TSQMWE8TsFgEpCijQuu7TvCbndc4A",
+  "serverPublicKey": "C6rNnPKxXSTSWxdMH3ZWmZG7ZwXhPurPbUkGuyvtDzT4",
+  "serverTokenAccount": "G9fXJnoKArRrqRDKmJcxXbsoZSi5VKyryfTf4a93htJh",
+  "decimals": 9,
+  "initialSupply": 1000000,
+  "network": "devnet",
+  "rpc": "https://api.devnet.solana.com"
+}

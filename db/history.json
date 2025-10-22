@@ -1,0 +1,236 @@
+[
+  {
+    "id": "1761127148283_H2TRHzqY",
+    "publicKey": "H2TRHzqYX7ukCEeP8FDdpt5EeXdLZhQNkergkGkCWjuL",
+    "stationCode": "BERSTD34",
+    "connectorId": "C1",
+    "status": "stopped_by_admin",
+    "kwhUsed": 0.0822231136200331,
+    "timeElapsedSeconds": 90,
+    "startTime": 1761127148283,
+    "pricing": {
+      "time_based": {
+        "rate": 2,
+        "unit": "INR_per_min"
+      },
+      "energy_based": {
+        "rate": 19,
+        "unit": "INR_per_kWh"
+      }
+    },
+    "intervalId": {
+      "_idleTimeout": 10000,
+      "_idlePrev": null,
+      "_idleNext": null,
+      "_idleStart": 235207,
+      "_repeat": 10000,
+      "_destroyed": false
+    },
+    "endTime": 1761127997625,
+    "totalCost": 4.562239158780629,
+    "totalCostSOL": 0.04562239158780629,
+    "rewardTokens": 0,
+    "rewardSent": false,
+    "adminStopped": true,
+    "completedAt": "2025-10-22T10:13:17.625Z"
+  },
+  {
+    "id": "1761128041145_H2TRHzqY",
+    "publicKey": "H2TRHzqYX7ukCEeP8FDdpt5EeXdLZhQNkergkGkCWjuL",
+    "stationCode": "CHENNAI88",
+    "connectorId": "C1",
+    "status": "stopped_by_admin",
+    "kwhUsed": 0.42379130352749317,
+    "timeElapsedSeconds": 70,
+    "startTime": 1761128041145,
+    "pricing": {
+      "time_based": {
+        "rate": 3,
+        "unit": "INR_per_min"
+      },
+      "energy_based": {
+        "rate": 21.5,
+        "unit": "INR_per_kWh"
+      }
+    },
+    "intervalId": {
+      "_idleTimeout": 10000,
+      "_idlePrev": null,
+      "_idleNext": null,
+      "_idleStart": 348488,
+      "_repeat": 10000,
+      "_destroyed": false
+    },
+    "endTime": 1761128583235,
+    "totalCost": 12.611513025841104,
+    "totalCostSOL": 0.12611513025841103,
+    "rewardTokens": 0,
+    "rewardSent": false,
+    "adminStopped": true,
+    "completedAt": "2025-10-22T10:23:03.235Z"
+  },
+  {
+    "id": "1761128619656_H2TRHzqY",
+    "publicKey": "H2TRHzqYX7ukCEeP8FDdpt5EeXdLZhQNkergkGkCWjuL",
+    "stationCode": "CHENNAI88",
+    "connectorId": "C1",
+    "status": "stopped_by_admin",
+    "kwhUsed": 0.689723497942308,
+    "timeElapsedSeconds": 498,
+    "startTime": 1761128619656,
+    "pricing": {
+      "time_based": {
+        "rate": 3,
+        "unit": "INR_per_min"
+      },
+      "energy_based": {
+        "rate": 21.5,
+        "unit": "INR_per_kWh"
+      }
+    },
+    "totalCost": 39.72905520575962,
+    "totalCostSOL": 0.3972905520575962,
+    "endTime": 1761129122125,
+    "paymentTx": null,
+    "rewardTokens": 0,
+    "rewardSent": true,
+    "completedAt": "2025-10-22T10:32:02.126Z"
+  },
+  {
+    "id": "1761129141896_H2TRHzqY",
+    "publicKey": "H2TRHzqYX7ukCEeP8FDdpt5EeXdLZhQNkergkGkCWjuL",
+    "stationCode": "CHENNAI88",
+    "connectorId": "C1",
+    "status": "stopped_by_admin",
+    "kwhUsed": 2.721996182933543,
+    "timeElapsedSeconds": 463,
+    "startTime": 1761129141896,
+    "pricing": {
+      "time_based": {
+        "rate": 3,
+        "unit": "INR_per_min"
+      },
+      "energy_based": {
+        "rate": 21.5,
+        "unit": "INR_per_kWh"
+      }
+    },
+    "totalCost": 81.67291793307118,
+    "totalCostSOL": 0.8167291793307118,
+    "endTime": 1761129610512,
+    "rewardTokens": 2,
+    "rewardSent": false,
+    "rewardError": "Recipient token account (ATA) does not exist. Recipient must create an ATA for the token before receiving rewards.",
+    "completedAt": "2025-10-22T10:40:11.575Z"
+  },
+  {
+    "id": "1761130318347_H2TRHzqY",
+    "publicKey": "H2TRHzqYX7ukCEeP8FDdpt5EeXdLZhQNkergkGkCWjuL",
+    "stationCode": "CHENNAI88",
+    "connectorId": "C1",
+    "status": "stopped_by_admin",
+    "kwhUsed": 1.4077994376234928,
+    "timeElapsedSeconds": 230,
+    "startTime": 1761130318347,
+    "pricing": {
+      "time_based": {
+        "rate": 3,
+        "unit": "INR_per_min"
+      },
+      "energy_based": {
+        "rate": 21.5,
+        "unit": "INR_per_kWh"
+      }
+    },
+    "totalCost": 41.767687908905096,
+    "totalCostSOL": 0.41767687908905093,
+    "endTime": 1761130555829,
+    "rewardTokens": 1,
+    "rewardSent": true,
+    "rewardTx": "47HVu4SMh2jmviztLHhxyYqKw4zbtYGGDnZafY9vmSsZpSwL1GLL3NPwHkG8GH2RWMvS2fdoyNW1pZHsyYCW8SzF",
+    "completedAt": "2025-10-22T10:55:59.938Z"
+  },
+  {
+    "id": "1761138463475_H2TRHzqY",
+    "publicKey": "H2TRHzqYX7ukCEeP8FDdpt5EeXdLZhQNkergkGkCWjuL",
+    "stationCode": "CHENNAI88",
+    "connectorId": "C1",
+    "status": "completed",
+    "kwhUsed": 2.7199838827965777,
+    "timeElapsedSeconds": 445,
+    "startTime": 1761138463475,
+    "pricing": {
+      "time_based": {
+        "rate": 3,
+        "unit": "INR_per_min"
+      },
+      "energy_based": {
+        "rate": 21.5,
+        "unit": "INR_per_kWh"
+      }
+    },
+    "totalCost": 80.72965348012642,
+    "totalCostSOL": 0.8072965348012642,
+    "endTime": 1761138913461,
+    "paymentTx": "2gKqexkqpexTTs2Ft24FJo8ZzcMYHM1PsNnYrNmfdo286f36GWKrpXJYxoE1DmnMxVJEF9REBNCvj5knWF3Wiifi",
+    "rewardTokens": 2,
+    "rewardSent": true,
+    "rewardTx": "2UbbhWmjMQNzSsVVZ8e3iDuaw8cgmsr9Shp691cNhdLh7UNS6PyyacnS6PbdpsMXc8ZV9CSFaMhkveXTxr7gF52Y",
+    "completedAt": "2025-10-22T13:15:15.203Z"
+  },
+  {
+    "id": "1761142518295_H2TRHzqY",
+    "publicKey": "H2TRHzqYX7ukCEeP8FDdpt5EeXdLZhQNkergkGkCWjuL",
+    "stationCode": "BERSTD34",
+    "connectorId": "C1",
+    "status": "completed",
+    "kwhUsed": 4.467611541156614,
+    "timeElapsedSeconds": 4873,
+    "startTime": 1761142518296,
+    "pricing": {
+      "time_based": {
+        "rate": 2,
+        "unit": "INR_per_min"
+      },
+      "energy_based": {
+        "rate": 19,
+        "unit": "INR_per_kWh"
+      }
+    },
+    "totalCost": 247.31795261530903,
+    "totalCostSOL": 2.4731795261530904,
+    "endTime": 1761147396846,
+    "paymentTx": "d44JfyryfdeCGKMCDDSw7LYi7nX9ajnJU3TQDCJKfbLGtdA83agUJBGtchDrCzA3Ugaxj2tnHBFTr48BRryb9Zy",
+    "rewardTokens": 4,
+    "rewardSent": true,
+    "rewardTx": "3w3P7GVeidjq6cnY1pCUThMRqS1kv9ZM91Bvzi6C9XWPNW3THSwcX6haxLErrKz2CZMbCVgVikBtP16r9aaUEm6b",
+    "completedAt": "2025-10-22T15:36:39.349Z"
+  },
+  {
+    "id": "1761139070617_DNp37Sk2",
+    "publicKey": "DNp37Sk2uBkFuG6EEi664J6j27666Hqvx9gbsS2B2hU6",
+    "stationCode": "DELHINR12",
+    "connectorId": "C1",
+    "status": "stopped_by_admin",
+    "kwhUsed": 17.542779056341644,
+    "timeElapsedSeconds": 8526,
+    "startTime": 1761139070618,
+    "pricing": {
+      "time_based": {
+        "rate": 2.5,
+        "unit": "INR_per_min"
+      },
+      "energy_based": {
+        "rate": 20,
+        "unit": "INR_per_kWh"
+      }
+    },
+    "totalCost": 706.1055811268329,
+    "totalCostSOL": 7.0610558112683295,
+    "endTime": 1761147601649,
+    "rewardTokens": 17,
+    "rewardSent": true,
+    "rewardTx": "5Vxg225ij8ESDNu8LB3uPiUjLffa5ZHRWMxjCuzHv3XeBXnw5Ts5sVzgGeaBLttyQGxhhjHiYsD5ZFiYUejgdV5T",
+    "completedAt": "2025-10-22T15:40:29.215Z"
+  }
+]
