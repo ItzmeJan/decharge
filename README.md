@@ -26,46 +26,59 @@ This DApp addresses the hackathon's goal of creating innovative solutions for el
 
 ## 📋 Table of Contents
 
-- [Overview](#overview)
-- [Features](#features)
-- [Architecture](#architecture)
-- [Technology Stack](#technology-stack)
-- [Installation & Setup](#installation--setup)
-- [Project Structure](#project-structure)
-- [API Documentation](#api-documentation)
-- [User Flow Diagrams](#user-flow-diagrams)
-- [Database Schema](#database-schema)
-- [Security Features](#security-features)
-- [Deployment](#deployment)
-- [Contributing](#contributing)
-- [License](#license)
+- [Overview](#-overview)
+- [Features](#-features)
+- [Architecture](#-architecture)
+- [Admin Panel](#️-admin-panel)
+- [Technology Stack](#️-technology-stack)
+- [Installation & Setup](#-installation--setup)
+- [Project Structure](#-project-structure)
+- [API Documentation](#-api-documentation)
+- [User Flow Diagrams](#-user-flow-diagrams)
+- [Database Schema](#-database-schema)
+- [Security Features](#-security-features)
+- [Deployment](#-deployment)
+- [Contributing](#-contributing)
+- [License](#-license)
 
 ## 🚀 Overview
 
-The EV Charging DApp is a blockchain-based solution that revolutionizes electric vehicle charging by providing:
+The EV Charging DApp is a comprehensive blockchain-based solution that revolutionizes electric vehicle charging by providing:
 
 - **Decentralized Infrastructure**: No single point of failure
 - **Cryptocurrency Payments**: Secure, instant transactions using Solana
-- **Real-time Monitoring**: Live charging session tracking
+- **Real-time Monitoring**: Live charging session tracking with live feed
 - **Reward System**: Token incentives for sustainable charging
-- **Modern UI/UX**: Responsive design with glassmorphism aesthetics
+- **Points Trading Marketplace**: Web3 users can buy EV driver points at 50% discount
+- **Virtual DeCharge Worlds**: Gamified EV ecosystem with limited plots and chargers
+- **Modern UI/UX**: Smooth animations and responsive design with glassmorphism aesthetics
+- **Mobile Optimized**: Touch-friendly interface with performance optimizations
 
 ## ✨ Features
 
 ### Core Functionality
-- 🗺️ **Interactive Map**: Real-time charging station locations
+- 🗺️ **Interactive Map**: Real-time charging station locations with Leaflet.js
 - ⚡ **Session Management**: Start, monitor, and end charging sessions
-- 💰 **Crypto Payments**: Solana-based payment processing
-- 🎁 **Reward Tokens**: Earn tokens for sustainable charging
+- 💰 **Crypto Payments**: Solana-based payment processing with transaction verification
+- 🎁 **Reward Tokens**: Earn SPL tokens for sustainable charging
 - 📊 **History Tracking**: Complete charging session history
-- 🔐 **Wallet Integration**: Phantom wallet connectivity
+- 🔐 **Wallet Integration**: Phantom wallet connectivity with signature verification
+
+### 🆕 New Features (Hackathon Requirements)
+- 📡 **Live Charging Feed**: Real-time display of all active charging sessions with points earned
+- 🔄 **Points Trading Marketplace**: EV drivers can sell points, Web3 users can buy at 50% discount
+- 🎮 **Virtual DeCharge Worlds**: Gamified EV ecosystem with 64 limited plots, virtual chargers, and rewards
+- 💎 **On-chain Transparency**: All transactions recorded on Solana blockchain
+- 🏆 **Gamification**: Virtual world with plot ownership and charger installation
 
 ### User Interface
-- 📱 **Responsive Design**: Mobile-first approach
-- 🌓 **Dark/Light Theme**: User preference support
-- 🎨 **Modern UI**: Glassmorphism design language
-- 🧭 **Intuitive Navigation**: Easy-to-use interface
-- ⚡ **Real-time Updates**: Live session monitoring
+- 📱 **Responsive Design**: Mobile-first approach with touch optimizations
+- 🌓 **Dark/Light Theme**: User preference support with persistent storage
+- 🎨 **Modern UI**: Glassmorphism design language with smooth animations
+- 🧭 **Intuitive Navigation**: Easy-to-use interface with sidebar navigation
+- ⚡ **Real-time Updates**: Live session monitoring with auto-refresh
+- 🎭 **Smooth Animations**: Professional transitions and hover effects
+- 📱 **Mobile Optimized**: Touch-friendly interactions with performance fixes
 
 ## 🏗️ Architecture
 
@@ -76,6 +89,8 @@ The EV Charging DApp is a blockchain-based solution that revolutionizes electric
 │  • React-like Components    • Leaflet Maps                 │
 │  • Phantom Wallet Integration • Responsive Design          │
 │  • Real-time Updates        • Theme Support               │
+│  • Live Charging Feed       • Points Trading UI           │
+│  • Virtual World Interface  • Smooth Animations           │
 └─────────────────────────────────────────────────────────────┘
                                 │
                                 ▼
@@ -85,6 +100,8 @@ The EV Charging DApp is a blockchain-based solution that revolutionizes electric
 │  • REST API Endpoints      • Session Management           │
 │  • Solana Integration      • Token Operations              │
 │  • Database Operations     • Security & Validation        │
+│  • Marketplace Logic       • Virtual World System         │
+│  • Points Trading          • Admin Panel                  │
 └─────────────────────────────────────────────────────────────┘
                                 │
                                 ▼
@@ -94,8 +111,29 @@ The EV Charging DApp is a blockchain-based solution that revolutionizes electric
 │  • Payment Processing      • Token Transfers               │
 │  • Wallet Authentication   • Transaction Verification     │
 │  • Smart Contract Logic    • Reward Distribution          │
+│  • Points Trading          • Virtual World Assets         │
 └─────────────────────────────────────────────────────────────┘
 ```
+
+## 🛡️ Admin Panel
+
+The DApp includes a comprehensive admin panel (`/admin.html`) with modern styling and advanced features:
+
+### Admin Features
+- **📊 Dashboard**: Real-time statistics and metrics
+- **⚡ Session Management**: Monitor and control active charging sessions
+- **📈 Analytics**: Revenue, energy usage, and reward distribution tracking
+- **🔄 Marketplace Oversight**: Monitor points trading activity
+- **🎮 Virtual World Management**: Track plot ownership and charger installations
+- **🌓 Theme Support**: Dark/light mode with persistent preferences
+- **📱 Responsive Design**: Works on all devices
+
+### Admin Endpoints
+- `GET /admin/sessions` - View all sessions
+- `GET /admin/history` - Complete charging history
+- `POST /admin/stopSession` - Stop active sessions
+- `GET /marketplaceStats` - Trading analytics
+- `GET /virtualWorldStats` - Virtual world metrics
 
 ## 🛠️ Technology Stack
 
@@ -185,6 +223,132 @@ decharge/
 ```
 
 ## 🔌 API Documentation
+
+### 🆕 New Endpoints (Hackathon Features)
+
+#### `GET /userPoints?pubkey={wallet-address}`
+Get user's total reward points and breakdown.
+
+**Response:**
+```json
+{
+  "totalPoints": 150,
+  "breakdown": [
+    {
+      "sessionId": "session-123",
+      "points": 25,
+      "kwhUsed": 5.2,
+      "completedAt": "2024-01-15T10:30:00Z"
+    }
+  ]
+}
+```
+
+#### `POST /sellPoints`
+List points for sale in the marketplace.
+
+**Request Body:**
+```json
+{
+  "publicKey": "user-wallet-address",
+  "amount": 100
+}
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "message": "100 points listed for sale",
+  "orderId": "order-123",
+  "totalSellerValue": 1.0,
+  "totalBuyerCost": 1.5
+}
+```
+
+#### `POST /buyPoints`
+Purchase points from the marketplace.
+
+**Request Body:**
+```json
+{
+  "publicKey": "buyer-wallet-address",
+  "amount": 50,
+  "txSignature": "solana-transaction-signature"
+}
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "message": "Successfully purchased 50 points",
+  "cost": 0.75,
+  "pointsReceived": 50,
+  "seller": "seller-wallet-address"
+}
+```
+
+#### `GET /marketplaceStats`
+Get marketplace statistics and pricing.
+
+**Response:**
+```json
+{
+  "marketplace": {
+    "activeSellOrders": 5,
+    "totalSellVolume": 500,
+    "totalTransactions": 12,
+    "averagePrice": 0.015
+  },
+  "marketPrice": {
+    "basePrice": 0.01,
+    "buyerPrice": 0.015,
+    "sellerPrice": 0.01
+  }
+}
+```
+
+#### `GET /virtualWorld?pubkey={wallet-address}`
+Get user's virtual world assets and available plots.
+
+**Response:**
+```json
+{
+  "userPlots": [0, 5, 12],
+  "userChargers": [0, 5],
+  "availablePlots": [
+    {
+      "id": 1,
+      "x": 1,
+      "y": 0,
+      "price": 75
+    }
+  ]
+}
+```
+
+#### `POST /buyVirtualPlot`
+Purchase a virtual plot in the virtual world.
+
+**Request Body:**
+```json
+{
+  "publicKey": "user-wallet-address",
+  "plotId": 1
+}
+```
+
+#### `POST /installVirtualCharger`
+Install a virtual charger on an owned plot.
+
+**Request Body:**
+```json
+{
+  "publicKey": "user-wallet-address",
+  "plotId": 1
+}
+```
 
 ### Authentication Endpoints
 
@@ -376,6 +540,90 @@ sequenceDiagram
     F->>U: Show Success
 ```
 
+### 🆕 Points Trading Flow
+
+```mermaid
+graph TD
+    A[EV Driver Earns Points] --> B[View Points Balance]
+    B --> C[Choose to Sell Points]
+    C --> D[Set Amount & List for Sale]
+    D --> E[Points Listed in Marketplace]
+    E --> F[Web3 User Views Marketplace]
+    F --> G[Select Points to Buy]
+    G --> H[Pay 50% Markup Price]
+    H --> I[Points Transferred to Buyer]
+    I --> J[Seller Receives Payment]
+    J --> K[Transaction Recorded On-Chain]
+```
+
+### 🎮 Virtual World Flow
+
+```mermaid
+graph TD
+    A[User Enters Virtual World] --> B[View 8x8 Plot Grid]
+    B --> C[Check Available Plots]
+    C --> D[Purchase Plot with Points]
+    D --> E[Plot Ownership Confirmed]
+    E --> F[Install Virtual Charger]
+    F --> G[Charger Active on Plot]
+    G --> H[Earn Virtual Rewards]
+    H --> I[Use Rewards for More Plots]
+    I --> J[Expand Virtual Empire]
+```
+
+### 📡 Live Charging Feed Flow
+
+```mermaid
+sequenceDiagram
+    participant U as User
+    participant F as Frontend
+    participant B as Backend
+    participant S as All Sessions
+    
+    U->>F: Navigate to Live Feed
+    F->>B: GET /admin/sessions
+    B->>S: Query Active Sessions
+    S->>B: Return Session Data
+    B->>F: Active Sessions with Points
+    F->>U: Display Live Feed
+    Note over F: Auto-refresh every 5s
+    F->>B: GET /admin/sessions
+    B->>F: Updated Session Data
+    F->>U: Update Live Feed Display
+```
+
+### 🔄 Marketplace Transaction Flow
+
+```mermaid
+sequenceDiagram
+    participant EV as EV Driver
+    participant W3 as Web3 User
+    participant F as Frontend
+    participant B as Backend
+    participant S as Solana Network
+    
+    EV->>F: List Points for Sale
+    F->>B: POST /sellPoints
+    B->>B: Create Sell Order
+    B->>F: Order Created
+    F->>EV: Points Listed Successfully
+    
+    W3->>F: Browse Marketplace
+    F->>B: GET /sellOrders
+    B->>F: Available Orders
+    F->>W3: Show Available Points
+    
+    W3->>F: Select Points to Buy
+    F->>S: Create Payment Transaction
+    S->>F: Transaction Signature
+    F->>B: POST /buyPoints
+    B->>B: Match with Sell Order
+    B->>S: Transfer Points to Buyer
+    S->>B: Confirm Transfer
+    B->>F: Purchase Successful
+    F->>W3: Points Received
+```
+
 ## 🗄️ Database Schema
 
 ### Sessions Collection
@@ -425,6 +673,71 @@ sequenceDiagram
     "value": "random-nonce-string",
     "timestamp": "2024-01-15T10:00:00Z",
     "used": false
+  }
+}
+```
+
+### 🆕 Marketplace Collections
+
+#### Sell Orders Collection
+```json
+{
+  "orderId": {
+    "id": "order-123",
+    "seller": "wallet-address",
+    "amount": 100,
+    "price": 0.01,
+    "buyerPrice": 0.015,
+    "status": "active",
+    "timestamp": "2024-01-15T10:00:00Z"
+  }
+}
+```
+
+#### Transactions Collection
+```json
+{
+  "transactionId": {
+    "id": "tx-123",
+    "buyer": "buyer-wallet-address",
+    "seller": "seller-wallet-address",
+    "amount": 50,
+    "price": 0.015,
+    "totalCost": 0.75,
+    "sellerReceives": 0.50,
+    "timestamp": "2024-01-15T10:00:00Z",
+    "txSignature": "solana-transaction-signature"
+  }
+}
+```
+
+### 🎮 Virtual World Collections
+
+#### Plots Collection
+```json
+{
+  "plotId": {
+    "id": 1,
+    "x": 1,
+    "y": 0,
+    "owner": "wallet-address",
+    "hasCharger": true,
+    "chargerType": "standard",
+    "price": 75,
+    "purchasedAt": "2024-01-15T10:00:00Z"
+  }
+}
+```
+
+#### User Assets Collection
+```json
+{
+  "userId": {
+    "publicKey": "wallet-address",
+    "plots": [0, 5, 12],
+    "chargers": [0, 5],
+    "virtualEarnings": 25,
+    "lastUpdated": "2024-01-15T10:00:00Z"
   }
 }
 ```
