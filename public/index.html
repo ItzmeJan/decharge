@@ -55,11 +55,42 @@
     align-items:center; 
     justify-content:center;
     font-size:16px; color:#fff; background: rgba(255,255,255,0.06); position:relative; overflow:hidden;
-    transition: transform .22s ease, background .22s;
+    transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
     text-align:center;
     line-height:1;
+    opacity: 0;
+    transform: translateX(-20px) scale(0.8);
+    animation: sidebarButtonFadeIn 0.8s ease-out forwards;
   }
-  .sidebar .icon-btn:hover { transform: scale(1.07); background: rgba(255,255,255,0.12); }
+  .sidebar .icon-btn:hover { 
+    transform: scale(1.15) translateY(-3px); 
+    background: rgba(255,255,255,0.2);
+    box-shadow: 0 12px 30px rgba(255,255,255,0.15);
+    filter: brightness(1.2);
+  }
+  .sidebar .icon-btn:active {
+    transform: scale(1.08) translateY(-1px);
+    transition: all 0.15s ease;
+  }
+  
+  @keyframes sidebarButtonFadeIn {
+    0% {
+      opacity: 0;
+      transform: translateX(-20px) scale(0.8);
+    }
+    100% {
+      opacity: 1;
+      transform: translateX(0) scale(1);
+    }
+  }
+  
+  /* Staggered animation for sidebar buttons */
+  .sidebar .icon-btn:nth-child(1) { animation-delay: 0.1s; }
+  .sidebar .icon-btn:nth-child(2) { animation-delay: 0.2s; }
+  .sidebar .icon-btn:nth-child(3) { animation-delay: 0.3s; }
+  .sidebar .icon-btn:nth-child(4) { animation-delay: 0.4s; }
+  .sidebar .icon-btn:nth-child(5) { animation-delay: 0.5s; }
+  .sidebar .icon-btn:nth-child(6) { animation-delay: 0.6s; }
 
   /* ripple */
   .ripple { position:absolute; border-radius:50%; transform:scale(0); animation:ripple .6s linear; background: rgba(255,255,255,0.45); pointer-events:none; }
@@ -85,10 +116,29 @@
 
   .btn {
     background:var(--accent-1); color:white; border:none; padding:10px 16px; border-radius:12px; cursor:pointer;
-    font-weight:700; letter-spacing:0.2px; transition: transform .16s, box-shadow .16s;
+    font-weight:700; letter-spacing:0.2px; 
+    transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    position: relative;
+    overflow: hidden;
   }
-  .btn.ghost { background:transparent; color:var(--text); border:1px solid rgba(0,0,0,0.06); }
-  .btn:active { transform:scale(.98); }
+  .btn:hover {
+    transform: translateY(-2px) scale(1.02);
+    box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
+    filter: brightness(1.1);
+  }
+  .btn:active { 
+    transform: scale(.96) translateY(0);
+    transition: all 0.1s ease;
+  }
+  .btn.ghost { 
+    background:transparent; color:var(--text); border:1px solid rgba(0,0,0,0.06);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  .btn.ghost:hover {
+    background: rgba(102, 126, 234, 0.1);
+    border-color: rgba(102, 126, 234, 0.3);
+    transform: translateY(-1px);
+  }
   .small { padding:8px 12px; font-size:13px; border-radius:10px; }
 
   /* layout content area: map + right column or stacked on mobile */
@@ -104,12 +154,22 @@
     gap: 14px;
     padding: 18px;
     overflow: hidden;
+    opacity: 0;
+    transform: translateY(30px) scale(0.95);
+    transition: all 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    filter: blur(2px);
   }
   .page-section.active {
     display: flex;
+    opacity: 1;
+    transform: translateY(0) scale(1);
+    filter: blur(0px);
   }
   .page-section.map-view {
     display: flex;
+    opacity: 1;
+    transform: translateY(0) scale(1);
+    filter: blur(0px);
   }
 
   /* map column */
@@ -127,6 +187,11 @@
 
   .panel {
     background:var(--card); border-radius:14px; padding:12px; box-shadow: 0 8px 22px rgba(2,6,23,0.06); overflow:auto;
+    transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  }
+  .panel:hover {
+    transform: translateY(-4px) scale(1.02);
+    box-shadow: 0 16px 40px rgba(2,6,23,0.15);
   }
 
   .token-balance { display:inline-flex; align-items:center; gap:8px; padding:8px 12px; border-radius:12px; font-weight:700; background:linear-gradient(90deg,#e6ffef,#ddf7e6); color:#0b7a3f; }
@@ -135,10 +200,20 @@
   .stations-list { display:grid; grid-template-columns: 1fr; gap:10px; }
   .station {
     border-radius:12px; padding:12px; display:flex; flex-direction:column; gap:8px; background: linear-gradient(135deg,#ffffff,#f5fbff);
-    transition: transform .16s, box-shadow .16s;
+    transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    cursor: pointer;
   }
   body.dark .station { background: linear-gradient(135deg,#14141b,#1c1c2b); }
-  .station:hover { transform:translateY(-6px); box-shadow: 0 12px 30px rgba(20,32,80,0.06); cursor:pointer; }
+  .station:hover { 
+    transform: translateY(-8px) scale(1.02); 
+    box-shadow: 0 20px 40px rgba(20,32,80,0.15);
+    background: linear-gradient(135deg,#f8fbff,#e8f4ff);
+    filter: brightness(1.05);
+  }
+  body.dark .station:hover {
+    background: linear-gradient(135deg,#1a1a2e,#16213e);
+    filter: brightness(1.1);
+  }
 
   .station .head { display:flex; justify-content:space-between; align-items:center; gap:8px; }
   .station h3 { margin:0; font-size:15px; color:var(--text); }
@@ -159,9 +234,18 @@
 
   .connector-action {
     border:none; padding:8px 12px; border-radius:12px; font-weight:800; cursor:pointer; min-width:90px;
-    transition: transform .12s;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    overflow: hidden;
   }
-  .connector-action:active { transform:scale(.98); }
+  .connector-action:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+  }
+  .connector-action:active { 
+    transform: scale(.95) translateY(0);
+    transition: all 0.1s ease;
+  }
 
   .start-btn { background: linear-gradient(90deg,#06b6d4,#3b82f6); color:#fff; box-shadow:0 8px 28px rgba(59,130,246,0.18); }
   .stop-btn  { background: linear-gradient(90deg,#ef4444,#fb7185); color:#fff; }
@@ -175,21 +259,35 @@
   /* ---------- Bottom sheet (station details) ---------- */
   .sheet {
     position:fixed; left:0; right:0; bottom:-100%; height:52vh; max-height:64vh; background:var(--card); border-top-left-radius:18px; border-top-right-radius:18px; box-shadow: 0 -20px 60px rgba(2,6,23,0.22);
-    transition: bottom .36s cubic-bezier(.2,.9,.3,1);
+    transition: all 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
     z-index:120;
     padding:14px;
     display:flex; flex-direction:column; gap:12px;
+    opacity: 0;
+    transform: translateY(40px) scale(0.95);
+    filter: blur(3px);
   }
-  .sheet.open { bottom:0.5vh; }
+  .sheet.open { 
+    bottom:0.5vh; 
+    opacity: 1;
+    transform: translateY(0) scale(1);
+    filter: blur(0px);
+  }
   .sheet .drag { width:56px; height:6px; background:rgba(0,0,0,0.08); border-radius:6px; margin:6px auto; }
   .sheet .sheet-body { overflow:auto; padding:6px; display:flex; flex-direction:column; gap:12px; }
 
   /* overlay when sidebar open or sheet open */
   .overlay {
-    position:fixed; inset:0; background:rgba(2,6,23,0.35); opacity:0; pointer-events:none; transition:opacity .28s;
+    position:fixed; inset:0; background:rgba(2,6,23,0.35); opacity:0; pointer-events:none; 
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    backdrop-filter: blur(0px);
     z-index:80;
   }
-  .overlay.visible { opacity:1; pointer-events:auto; }
+  .overlay.visible { 
+    opacity:1; 
+    pointer-events:auto;
+    backdrop-filter: blur(4px);
+  }
 
   /* Floating menu toggle for mobile - hidden since sidebar is always visible */
   .menu-toggle {
@@ -200,6 +298,46 @@
   .theme-toggle {
     position:fixed; bottom:18px; right:18px; width:50px; height:50px; border-radius:50%; display:grid; place-items:center; font-size:20px; z-index:140;
     background:var(--accent-2); color:#fff; box-shadow:0 12px 25px rgba(0,0,0,0.18); cursor:pointer;
+    transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    opacity: 0;
+    transform: translateY(30px) scale(0.8);
+    animation: themeToggleFadeIn 1s ease-out 0.5s forwards;
+  }
+  .theme-toggle:hover {
+    transform: scale(1.15) translateY(-4px);
+    box-shadow: 0 20px 45px rgba(0,0,0,0.3);
+    filter: brightness(1.2);
+  }
+  .theme-toggle:active {
+    transform: scale(1.08) translateY(-2px);
+    transition: all 0.15s ease;
+  }
+  
+  @keyframes themeToggleFadeIn {
+    0% {
+      opacity: 0;
+      transform: translateY(30px) scale(0.8);
+    }
+    100% {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+    }
+  }
+
+  /* Input field styling for dark mode */
+  input[type="number"] {
+    color: var(--text) !important;
+    background: var(--card) !important;
+    border: 1px solid rgba(0,0,0,0.1) !important;
+  }
+  body.dark input[type="number"] {
+    border: 1px solid rgba(255,255,255,0.1) !important;
+  }
+  input[type="number"]::placeholder {
+    color: rgba(0,0,0,0.5);
+  }
+  body.dark input[type="number"]::placeholder {
+    color: rgba(255,255,255,0.5);
   }
 
   /* Small screens adjustments */
@@ -277,6 +415,24 @@
   }
   @keyframes bubble-pop { to { transform:scale(3); opacity:0; } }
 
+  /* Loading animation for live feed */
+  .loading-pulse {
+    animation: pulse 1.5s ease-in-out infinite;
+  }
+  @keyframes pulse {
+    0%, 100% { opacity: 0.6; }
+    50% { opacity: 1; }
+  }
+
+  /* Smooth fade-in for content */
+  .fade-in {
+    animation: fadeIn 0.5s ease-out;
+  }
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
 </style>
 </head>
 <body class="light">
@@ -285,7 +441,9 @@
     <!-- Sidebar -->
     <div class="sidebar" id="sidebar">
       <button class="icon-btn" data-section="map" title="Map">🗺️</button>
-      <button class="icon-btn" data-section="session" title="Active">⚡</button>
+      <button class="icon-btn" data-section="liveFeed" title="Live Feed">📡</button>
+      <button class="icon-btn" data-section="trading" title="Trading">🔄</button>
+      <button class="icon-btn" data-section="virtualWorld" title="Virtual World">🎮</button>
       <button class="icon-btn" data-section="history" title="History">📊</button>
 
       <div style="flex:1"></div>
@@ -360,16 +518,6 @@
         </div> <!-- content -->
       </div> <!-- mapSection -->
 
-      <!-- Session View -->
-      <div class="page-section" id="sessionSection">
-        <div class="panel" style="flex:1; overflow:auto;">
-          <h3 style="margin-top:0">Active Charging Session</h3>
-          <div id="sessionDetailsFull">No active session</div>
-          <div style="margin-top:12px; display:flex; gap:10px;">
-            <button class="btn stop-btn" id="endSessionBtnFull" style="flex:1; background:linear-gradient(90deg,#ef4444,#fb7185); color:#fff;">End Session & Pay</button>
-          </div>
-        </div>
-      </div>
 
       <!-- History View -->
       <div class="page-section" id="historySection">
@@ -381,6 +529,124 @@
                 <thead><tr><th>Date</th><th>Station</th><th>Energy (kWh)</th><th>Cost (₹)</th><th>Rewards</th><th>Status</th></tr></thead>
                 <tbody><tr><td colspan="6" class="muted">No history yet</td></tr></tbody>
               </table>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Live Feed View -->
+      <div class="page-section" id="liveFeedSection">
+        <div class="panel" style="flex:1; overflow:auto;">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+            <h3 style="margin:0">⚡ Live Charging Feed</h3>
+            <div style="display:flex; gap:8px; align-items:center;">
+              <div class="muted" id="liveFeedCount">0 active sessions</div>
+              <button onclick="refreshLiveFeed()" class="btn small" style="padding:6px 10px; font-size:12px;">🔄 Refresh</button>
+            </div>
+          </div>
+          <div id="liveFeedContent">
+            <div class="muted" style="text-align:center; padding:40px;">Loading live feed...</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Points Trading View -->
+      <div class="page-section" id="tradingSection">
+        <div class="panel" style="flex:1; overflow:auto;">
+          <h3 style="margin-top:0">🔄 Points Trading</h3>
+          <div style="display:grid; grid-template-columns: 1fr 1fr; gap:20px; margin-bottom:20px;">
+            <div style="background:var(--card-2); padding:16px; border-radius:12px;">
+              <h4 style="margin:0 0 8px 0; color:var(--text);">Your Points</h4>
+              <div style="font-size:24px; font-weight:800; color:#0f9d58;" id="userPoints">0</div>
+              <div class="muted" style="font-size:12px;">Earned from charging</div>
+            </div>
+            <div style="background:var(--card-2); padding:16px; border-radius:12px;">
+              <h4 style="margin:0 0 8px 0; color:var(--text);">Market Price</h4>
+              <div style="font-size:24px; font-weight:800; color:#667eea;" id="marketPrice">1 SOL = 100 pts</div>
+              <div class="muted" style="font-size:12px;">Web3 users pay 50% more</div>
+            </div>
+          </div>
+          
+          <div style="background:linear-gradient(135deg,#e6ffef,#ddf7e6); padding:16px; border-radius:12px; margin-bottom:20px;">
+            <h4 style="margin:0 0 8px 0; color:#0b7a3f;">💡 How it works</h4>
+            <div style="font-size:14px; color:#0b7a3f;">
+              • EV drivers earn points for every kWh charged<br>
+              • Web3 users can buy your points at 50% discount<br>
+              • Points can be used for premium features and rewards
+            </div>
+          </div>
+
+          <div style="display:grid; grid-template-columns: 1fr 1fr; gap:12px;">
+            <div>
+              <h4 style="margin:0 0 8px 0;">Sell Points</h4>
+              <div style="display:flex; gap:8px;">
+                <input type="number" id="sellAmount" placeholder="Amount" style="flex:1; padding:8px; border-radius:8px;">
+                <button onclick="sellPoints()" class="btn" style="background:linear-gradient(90deg,#0f9d58,#0fbf6f);">Sell</button>
+              </div>
+            </div>
+            <div>
+              <h4 style="margin:0 0 8px 0;">Buy Points</h4>
+              <div style="display:flex; gap:8px;">
+                <input type="number" id="buyAmount" placeholder="Amount" style="flex:1; padding:8px; border-radius:8px;">
+                <button onclick="buyPoints()" class="btn" style="background:linear-gradient(90deg,#667eea,#764ba2);">Buy</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Virtual DeCharge Worlds View -->
+      <div class="page-section" id="virtualWorldSection">
+        <div class="panel" style="flex:1; overflow:auto;">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
+            <h3 style="margin:0">🎮 Virtual DeCharge Worlds</h3>
+            <div style="display:flex; gap:8px; align-items:center;">
+              <div class="muted" id="worldStats">0 plots owned</div>
+              <button onclick="refreshVirtualWorld()" class="btn small" style="padding:6px 10px; font-size:12px;">🔄 Refresh</button>
+            </div>
+          </div>
+          
+          <div style="background:linear-gradient(135deg,#f0f4ff,#e5eaff); padding:16px; border-radius:12px; margin-bottom:20px;">
+            <h4 style="margin:0 0 8px 0; color:#667eea;">🎮 Gamified EV Ecosystem</h4>
+            <div style="font-size:14px; color:#667eea;">
+              • Own virtual plots and install chargers<br>
+              • Limited charging spots create scarcity<br>
+              • Let others charge their virtual vehicles<br>
+              • Earn rewards from virtual charging sessions
+            </div>
+          </div>
+
+          <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap:12px; margin-bottom:20px;">
+            <div style="background:var(--card-2); padding:16px; border-radius:12px; text-align:center;">
+              <div style="font-size:24px; margin-bottom:8px;">🏠</div>
+              <div style="font-weight:800; margin-bottom:4px;">Your Plots</div>
+              <div style="font-size:20px; color:#0f9d58;" id="ownedPlots">0</div>
+            </div>
+            <div style="background:var(--card-2); padding:16px; border-radius:12px; text-align:center;">
+              <div style="font-size:24px; margin-bottom:8px;">⚡</div>
+              <div style="font-weight:800; margin-bottom:4px;">Active Chargers</div>
+              <div style="font-size:20px; color:#667eea;" id="activeChargers">0</div>
+            </div>
+            <div style="background:var(--card-2); padding:16px; border-radius:12px; text-align:center;">
+              <div style="font-size:24px; margin-bottom:8px;">💰</div>
+              <div style="font-weight:800; margin-bottom:4px;">Earnings</div>
+              <div style="font-size:20px; color:#f59e0b;" id="virtualEarnings">0 pts</div>
+            </div>
+          </div>
+
+          <div style="display:grid; grid-template-columns: 1fr 1fr; gap:12px;">
+            <button onclick="buyPlot()" class="btn" style="background:linear-gradient(90deg,#0f9d58,#0fbf6f); padding:12px;">
+              🏠 Buy Plot (50 pts)
+            </button>
+            <button onclick="installCharger()" class="btn" style="background:linear-gradient(90deg,#667eea,#764ba2); padding:12px;">
+              ⚡ Install Charger (25 pts)
+            </button>
+          </div>
+
+          <div style="margin-top:20px;">
+            <h4 style="margin:0 0 12px 0;">Virtual World Map</h4>
+            <div id="virtualMap" style="height:300px; background:var(--card-2); border-radius:12px; display:grid; grid-template-columns: repeat(8, 1fr); gap:2px; padding:8px;">
+              <!-- Virtual plots will be generated here -->
             </div>
           </div>
         </div>
@@ -470,7 +736,7 @@ function base58Encode(buffer){
 /* ===========================
    State & API config
    =========================== */
-const API_BASE = "https://tier-sustainable-feat-hey.trycloudflare.com"; // adjust if needed
+const API_BASE = window.location.href.split('://')[0]+"://"+window.location.href.split('://')[1].replace('/',''); // API_BASE.split('://')[1].replace('/','')
 let walletPublicKey = null;
 let map = null;
 let markers = [];
@@ -501,8 +767,6 @@ const activeSessionCard = document.getElementById('activeSessionCard');
 const sessionDetails = document.getElementById('sessionDetails');
 const endSessionBtn = document.getElementById('endSessionBtn');
 const historyTbody = document.querySelector('#historyTable tbody');
-const sessionDetailsFull = document.getElementById('sessionDetailsFull');
-const endSessionBtnFull = document.getElementById('endSessionBtnFull');
 const historyTbodyFull = document.querySelector('#historyTableFull tbody');
 
 /* ---------- UI interactions: sidebar + menu toggle + overlay ---------- */
@@ -801,11 +1065,8 @@ async function checkActiveSession(){
 }
 
 function renderActiveSession(s){
-  // Only show active session card if we're not on the session page
-  const currentSection = document.querySelector('.page-section.active');
-  if (currentSection && currentSection.id !== 'sessionSection') {
+  // Show active session card in map view
     activeSessionCard.style.display = 'block';
-  }
   
   const mins = Math.floor(s.timeElapsedSeconds/60), secs = s.timeElapsedSeconds % 60;
   const timeCost = (s.timeElapsedSeconds/60) * s.pricing.time_based.rate;
@@ -828,16 +1089,10 @@ function renderActiveSession(s){
     </div>
   `;
   sessionDetails.innerHTML = sessionHTML;
-  // Also update the full view if it exists
-  if (sessionDetailsFull) {
-    sessionDetailsFull.innerHTML = sessionHTML;
-    endSessionBtnFull.style.display = 'block';
-  }
 }
 
 /* End session (payment via Solana) */
 endSessionBtn.addEventListener('click', endSession);
-endSessionBtnFull.addEventListener('click', endSession);
 
 async function endSession(){
   try{
@@ -935,10 +1190,387 @@ async function loadHistory(){
 
 async function loadTokenBalance(){
   try{
-    // TODO: query token balance from chain, token program etc.
-    tokenAmountEl.textContent = '...';
+    if (!walletPublicKey) return;
+    
+    const resp = await fetch(`${API_BASE}/userPoints?pubkey=${walletPublicKey}`);
+    const data = await resp.json();
+    
+    tokenAmountEl.textContent = data.totalPoints || 0;
     tokenBalanceEl.style.display = 'inline-flex';
-  }catch(err){ console.error('loadTokenBalance', err); }
+  }catch(err){ 
+    console.error('loadTokenBalance', err);
+    tokenAmountEl.textContent = '0';
+    tokenBalanceEl.style.display = 'inline-flex';
+  }
+}
+
+/* ---------- Live Feed Functions ---------- */
+async function loadLiveFeed(){
+  try{
+    const resp = await fetch(`${API_BASE}/admin/sessions`);
+    const data = await resp.json();
+    const allSessions = data.sessions || [];
+    const activeSessions = allSessions.filter(s => s.status === 'charging');
+    
+    document.getElementById('liveFeedCount').textContent = `${activeSessions.length} active sessions`;
+    
+    const feedContent = document.getElementById('liveFeedContent');
+    if (activeSessions.length === 0) {
+      feedContent.innerHTML = '<div class="muted" style="text-align:center; padding:40px;">No active charging sessions</div>';
+      return;
+    }
+    
+    feedContent.innerHTML = activeSessions.map(session => {
+      const mins = Math.floor(session.timeElapsedSeconds / 60);
+      const secs = session.timeElapsedSeconds % 60;
+      const pointsEarned = Math.floor(session.kwhUsed);
+      const timeCost = (session.timeElapsedSeconds / 60) * session.pricing.time_based.rate;
+      const energyCost = session.kwhUsed * session.pricing.energy_based.rate;
+      const totalCost = timeCost + energyCost;
+      
+      return `
+        <div class="fade-in" style="background:var(--card-2); border-radius:12px; padding:16px; margin-bottom:12px; border-left:4px solid #0f9d58; transition: all 0.3s ease;">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+            <div style="font-weight:800; color:var(--text);">${session.stationCode} - ${session.connectorId}</div>
+            <div style="font-size:12px; color:#0f9d58; font-weight:800;">+${pointsEarned} pts</div>
+          </div>
+          <div style="display:grid; grid-template-columns: repeat(3, 1fr); gap:8px; font-size:13px;">
+            <div><span class="muted">Energy:</span> ${session.kwhUsed.toFixed(2)} kWh</div>
+            <div><span class="muted">Time:</span> ${mins}m ${secs}s</div>
+            <div><span class="muted">Cost:</span> ₹${totalCost.toFixed(2)}</div>
+          </div>
+          <div style="margin-top:8px; font-size:12px; color:var(--text);">
+            User: ${session.publicKey.slice(0, 6)}...${session.publicKey.slice(-4)}
+          </div>
+        </div>
+      `;
+    }).join('');
+    
+  } catch(err) {
+    console.error('loadLiveFeed', err);
+    document.getElementById('liveFeedContent').innerHTML = '<div class="muted" style="text-align:center; padding:40px;">Error loading live feed</div>';
+  }
+}
+
+function refreshLiveFeed(){
+  loadLiveFeed();
+}
+
+/* ---------- Points Trading Functions ---------- */
+async function loadUserPoints(){
+  try{
+    if (!walletPublicKey) return;
+    const resp = await fetch(`${API_BASE}/userPoints?pubkey=${walletPublicKey}`);
+    const data = await resp.json();
+    document.getElementById('userPoints').textContent = data.totalPoints || 0;
+  } catch(err) {
+    console.error('loadUserPoints', err);
+  }
+}
+
+async function sellPoints(){
+  const amount = parseInt(document.getElementById('sellAmount').value);
+  if (!amount || amount <= 0) {
+    alert('Please enter a valid amount');
+    return;
+  }
+  
+  if (!walletPublicKey) {
+    alert('Connect wallet first');
+    return;
+  }
+  
+  try{
+    const resp = await fetch(`${API_BASE}/sellPoints`, {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({ publicKey: walletPublicKey, amount })
+    });
+    const data = await resp.json();
+    
+    if (data.success) {
+      const message = `✅ Successfully listed ${amount} points for sale!\n\n` +
+        `📊 Order Details:\n` +
+        `• You'll receive: ${data.totalSellerValue.toFixed(4)} SOL\n` +
+        `• Buyers pay: ${data.totalBuyerCost.toFixed(4)} SOL\n` +
+        `• Order ID: ${data.orderId.slice(-8)}`;
+      alert(message);
+      document.getElementById('sellAmount').value = '';
+      await loadUserPoints();
+    } else {
+      alert('❌ Error: ' + (data.error || 'Failed to sell points'));
+    }
+  } catch(err) {
+    console.error('sellPoints', err);
+    alert('❌ Failed to sell points: ' + (err.message || err));
+  }
+}
+
+async function buyPoints(){
+  const amount = parseInt(document.getElementById('buyAmount').value);
+  if (!amount || amount <= 0) {
+    alert('Please enter a valid amount');
+    return;
+  }
+  
+  if (!walletPublicKey) {
+    alert('Connect wallet first');
+    return;
+  }
+  
+  const costSOL = amount * 0.015; // 50% discount: 1 SOL = 100 pts, so 1 pt = 0.01 SOL, but with 50% markup = 0.015 SOL
+  
+  if (!confirm(`Buy ${amount} points for ${costSOL.toFixed(4)} SOL?`)) return;
+  
+  try{
+    const provider = getProvider();
+    if (!provider) throw new Error('Phantom not available');
+    
+    const serverWallet = new window.solanaWeb3.PublicKey('C6rNnPKxXSTSWxdMH3ZWmZG7ZwXhPurPbUkGuyvtDzT4');
+    const connection = new window.solanaWeb3.Connection('https://api.devnet.solana.com');
+    const tx = new window.solanaWeb3.Transaction().add(
+      window.solanaWeb3.SystemProgram.transfer({
+        fromPubkey: provider.publicKey,
+        toPubkey: serverWallet,
+        lamports: Math.floor(costSOL * 1e9)
+      })
+    );
+    
+    tx.feePayer = provider.publicKey;
+    tx.recentBlockhash = (await connection.getLatestBlockhash()).blockhash;
+    
+    const signed = await provider.signTransaction(tx);
+    const txSig = await connection.sendRawTransaction(signed.serialize());
+    await connection.confirmTransaction(txSig);
+    
+    // Call backend to process points purchase
+    const resp = await fetch(`${API_BASE}/buyPoints`, {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({ 
+        publicKey: walletPublicKey, 
+        amount, 
+        txSignature: txSig 
+      })
+    });
+    const data = await resp.json();
+    
+    if (data.success) {
+      const message = `✅ Successfully purchased ${amount} points!\n\n` +
+        `📊 Transaction Details:\n` +
+        `• Points received: ${data.pointsReceived}\n` +
+        `• Total cost: ${data.cost.toFixed(4)} SOL\n` +
+        `• Seller: ${data.seller.slice(0, 6)}...${data.seller.slice(-4)}\n` +
+        `• Transaction ID: ${data.transaction.id.slice(-8)}`;
+      alert(message);
+      document.getElementById('buyAmount').value = '';
+      await loadUserPoints();
+    } else {
+      alert('❌ Error: ' + (data.error || 'Failed to buy points'));
+    }
+  } catch(err) {
+    console.error('buyPoints', err);
+    alert('Failed to buy points: ' + (err.message || err));
+  }
+}
+
+/* ---------- Virtual DeCharge Worlds Functions ---------- */
+let virtualWorldData = {
+  plots: [], // Array of plot objects
+  userPlots: [], // User's owned plots
+  userChargers: [] // User's installed chargers
+};
+
+async function loadVirtualWorld(){
+  try{
+    if (!walletPublicKey) return;
+    
+    // Generate virtual world if not exists
+    if (virtualWorldData.plots.length === 0) {
+      generateVirtualWorld();
+    }
+    
+    // Load user's virtual assets
+    const resp = await fetch(`${API_BASE}/virtualWorld?pubkey=${walletPublicKey}`);
+    const data = await resp.json();
+    
+    virtualWorldData.userPlots = data.userPlots || [];
+    virtualWorldData.userChargers = data.userChargers || [];
+    
+    updateVirtualWorldStats();
+    renderVirtualMap();
+    
+  } catch(err) {
+    console.error('loadVirtualWorld', err);
+  }
+}
+
+function generateVirtualWorld(){
+  // Generate 64 plots (8x8 grid)
+  virtualWorldData.plots = [];
+  for (let i = 0; i < 64; i++) {
+    virtualWorldData.plots.push({
+      id: i,
+      x: i % 8,
+      y: Math.floor(i / 8),
+      owner: null,
+      hasCharger: false,
+      chargerType: null,
+      price: 50 + Math.floor(Math.random() * 50) // 50-100 points
+    });
+  }
+}
+
+function updateVirtualWorldStats(){
+  const ownedPlots = virtualWorldData.userPlots.length;
+  const activeChargers = virtualWorldData.userChargers.length;
+  const earnings = virtualWorldData.userChargers.length * 5; // 5 points per charger per day
+  
+  document.getElementById('ownedPlots').textContent = ownedPlots;
+  document.getElementById('activeChargers').textContent = activeChargers;
+  document.getElementById('virtualEarnings').textContent = earnings + ' pts';
+  document.getElementById('worldStats').textContent = `${ownedPlots} plots owned`;
+}
+
+function renderVirtualMap(){
+  const mapEl = document.getElementById('virtualMap');
+  mapEl.innerHTML = '';
+  
+  virtualWorldData.plots.forEach(plot => {
+    const plotEl = document.createElement('div');
+    plotEl.style.cssText = `
+      aspect-ratio: 1;
+      border-radius: 4px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+      cursor: pointer;
+      transition: all 0.2s;
+      position: relative;
+    `;
+    
+    // Determine plot appearance
+    if (plot.owner === walletPublicKey) {
+      plotEl.style.background = 'linear-gradient(135deg, #0f9d58, #0fbf6f)';
+      plotEl.style.color = 'white';
+      plotEl.innerHTML = plot.hasCharger ? '⚡' : '🏠';
+    } else if (plot.owner) {
+      plotEl.style.background = 'linear-gradient(135deg, #667eea, #764ba2)';
+      plotEl.style.color = 'white';
+      plotEl.innerHTML = plot.hasCharger ? '⚡' : '🏠';
+    } else {
+      plotEl.style.background = 'var(--card)';
+      plotEl.style.color = 'var(--text)';
+      plotEl.innerHTML = '🟫';
+    }
+    
+    plotEl.addEventListener('click', () => {
+      if (!plot.owner) {
+        buyPlot(plot.id);
+      } else if (plot.owner === walletPublicKey && !plot.hasCharger) {
+        installCharger(plot.id);
+      }
+    });
+    
+    mapEl.appendChild(plotEl);
+  });
+}
+
+async function buyPlot(plotId = null){
+  if (!walletPublicKey) {
+    alert('Connect wallet first');
+    return;
+  }
+  
+  const plot = virtualWorldData.plots[plotId];
+  if (!plot) return;
+  
+  if (plot.owner) {
+    alert('This plot is already owned');
+    return;
+  }
+  
+  const cost = plot.price;
+  if (!confirm(`Buy this plot for ${cost} points?`)) return;
+  
+  try{
+    const resp = await fetch(`${API_BASE}/buyVirtualPlot`, {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({ 
+        publicKey: walletPublicKey, 
+        plotId,
+        cost 
+      })
+    });
+    const data = await resp.json();
+    
+    if (data.success) {
+      alert(`Successfully bought plot ${plotId}!`);
+      plot.owner = walletPublicKey;
+      virtualWorldData.userPlots.push(plot);
+      updateVirtualWorldStats();
+      renderVirtualMap();
+    } else {
+      alert('Error: ' + (data.error || 'Failed to buy plot'));
+    }
+  } catch(err) {
+    console.error('buyPlot', err);
+    alert('Failed to buy plot: ' + (err.message || err));
+  }
+}
+
+async function installCharger(plotId = null){
+  if (!walletPublicKey) {
+    alert('Connect wallet first');
+    return;
+  }
+  
+  const plot = virtualWorldData.plots[plotId];
+  if (!plot || plot.owner !== walletPublicKey) {
+    alert('You must own this plot to install a charger');
+    return;
+  }
+  
+  if (plot.hasCharger) {
+    alert('This plot already has a charger');
+    return;
+  }
+  
+  const cost = 25;
+  if (!confirm(`Install charger for ${cost} points?`)) return;
+  
+  try{
+    const resp = await fetch(`${API_BASE}/installVirtualCharger`, {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({ 
+        publicKey: walletPublicKey, 
+        plotId,
+        cost 
+      })
+    });
+    const data = await resp.json();
+    
+    if (data.success) {
+      alert(`Successfully installed charger on plot ${plotId}!`);
+      plot.hasCharger = true;
+      plot.chargerType = 'standard';
+      virtualWorldData.userChargers.push(plot);
+      updateVirtualWorldStats();
+      renderVirtualMap();
+    } else {
+      alert('Error: ' + (data.error || 'Failed to install charger'));
+    }
+  } catch(err) {
+    console.error('installCharger', err);
+    alert('Failed to install charger: ' + (err.message || err));
+  }
+}
+
+function refreshVirtualWorld(){
+  loadVirtualWorld();
 }
 
 /* ---------- small helpers ---------- */
@@ -952,14 +1584,18 @@ function switchSection(name){
     if (activeSessionCard) {
       activeSessionCard.style.display = activeSessionCard.style.display === 'none' ? 'none' : 'block';
     }
-  } else if (name === 'session'){
-    document.getElementById('sessionSection').classList.add('active');
-    // Hide active session card in map view to avoid duplication
-    if (activeSessionCard) {
-      activeSessionCard.style.display = 'none';
-    }
-    // Update session details in the full view
-    updateSessionDetailsFull();
+  } else if (name === 'liveFeed'){
+    document.getElementById('liveFeedSection').classList.add('active');
+    // Load live feed when switching to this section
+    loadLiveFeed();
+  } else if (name === 'trading'){
+    document.getElementById('tradingSection').classList.add('active');
+    // Load user points when switching to trading
+    loadUserPoints();
+  } else if (name === 'virtualWorld'){
+    document.getElementById('virtualWorldSection').classList.add('active');
+    // Load virtual world when switching to this section
+    loadVirtualWorld();
   } else if (name === 'history'){
     document.getElementById('historySection').classList.add('active');
     // Show active session card in map view
@@ -971,16 +1607,6 @@ function switchSection(name){
   }
 }
 
-/* Update session details in full view */
-function updateSessionDetailsFull(){
-  if (activeSessionCard.style.display === 'none') {
-    sessionDetailsFull.innerHTML = '<div class="muted">No active charging session</div>';
-    endSessionBtnFull.style.display = 'none';
-  } else {
-    sessionDetailsFull.innerHTML = sessionDetails.innerHTML;
-    endSessionBtnFull.style.display = 'block';
-  }
-}
 
 /* Update history in full view */
 function updateHistoryFull(){

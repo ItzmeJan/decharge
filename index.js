@@ -624,12 +624,375 @@ app.post('/admin/stopSession', async (req, res) => {
 });
 
 // -----------------------------
+// Points Trading System
+// -----------------------------
+
+// Get user's total points (tokens) from history
+app.get('/userPoints', (req, res) => {
+  const { pubkey } = req.query;
+  if (!pubkey) return res.status(400).json({ error: 'Public key required' });
+  
+  const userHistory = history.filter(h => h.publicKey === pubkey);
+  const totalPoints = userHistory.reduce((sum, h) => sum + (h.rewardTokens || 0), 0);
+  
+  res.json({ 
+    totalPoints,
+    breakdown: userHistory.map(h => ({
+      sessionId: h.id,
+      points: h.rewardTokens || 0,
+      kwhUsed: h.kwhUsed,
+      completedAt: h.completedAt
+    }))
+  });
+});
+
+// Sell points (list for sale)
+app.post('/sellPoints', async (req, res) => {
+  try {
+    const { publicKey, amount } = req.body;
+    if (!publicKey || !amount || amount <= 0) {
+      return res.status(400).json({ error: 'Invalid parameters' });
+    }
+    
+    // Check if user has enough points
+    const userHistory = history.filter(h => h.publicKey === publicKey);
+    const totalPoints = userHistory.reduce((sum, h) => sum + (h.rewardTokens || 0), 0);
+    
+    if (totalPoints < amount) {
+      return res.status(400).json({ error: 'Insufficient points' });
+    }
+    
+    // Create sell order
+    const sellOrder = {
+      id: Date.now().toString(),
+      seller: publicKey,
+      amount: amount,
+      price: 0.01, // 1 point = 0.01 SOL (seller gets this)
+      buyerPrice: 0.015, // Buyers pay 50% more
+      timestamp: Date.now(),
+      status: 'active'
+    };
+    
+    pointsMarketplace.sellOrders.push(sellOrder);
+    
+    console.log(`User ${publicKey} listed ${amount} points for sale at ${sellOrder.price} SOL each`);
+    
+    res.json({ 
+      success: true, 
+      message: `${amount} points listed for sale`,
+      orderId: sellOrder.id,
+      sellerPrice: sellOrder.price,
+      buyerPrice: sellOrder.buyerPrice,
+      totalSellerValue: amount * sellOrder.price,
+      totalBuyerCost: amount * sellOrder.buyerPrice
+    });
+  } catch (e) {
+    console.error('sellPoints error:', e);
+    res.status(500).json({ error: 'Server error', details: e.message });
+  }
+});
+
+// Buy points (purchase from sellers)
+app.post('/buyPoints', async (req, res) => {
+  try {
+    const { publicKey, amount, txSignature } = req.body;
+    if (!publicKey || !amount || amount <= 0) {
+      return res.status(400).json({ error: 'Invalid parameters' });
+    }
+    
+    // Verify payment transaction
+    if (txSignature) {
+      try {
+        const tx = await connection.getTransaction(txSignature, { commitment: 'confirmed' });
+        if (!tx) return res.status(400).json({ error: 'Payment transaction not found' });
+        // In production, verify the transaction amount and recipient
+      } catch (e) {
+        return res.status(400).json({ error: 'Error fetching transaction', details: e.message });
+      }
+    }
+    
+    // Find available sell orders
+    const availableOrders = pointsMarketplace.sellOrders
+      .filter(order => order.status === 'active' && order.amount >= amount)
+      .sort((a, b) => a.timestamp - b.timestamp); // FIFO
+    
+    if (availableOrders.length === 0) {
+      return res.status(400).json({ error: 'No sell orders available for this amount' });
+    }
+    
+    const selectedOrder = availableOrders[0];
+    const buyerPrice = selectedOrder.buyerPrice; // 0.015 SOL per point
+    const totalCost = amount * buyerPrice;
+    
+    // Update the sell order
+    selectedOrder.amount -= amount;
+    if (selectedOrder.amount <= 0) {
+      selectedOrder.status = 'completed';
+    }
+    
+    // Create transaction record
+    const transaction = {
+      id: Date.now().toString(),
+      buyer: publicKey,
+      seller: selectedOrder.seller,
+      amount: amount,
+      price: buyerPrice,
+      totalCost: totalCost,
+      sellerReceives: amount * selectedOrder.price, // Seller gets less (0.01 SOL per point)
+      timestamp: Date.now(),
+      txSignature: txSignature
+    };
+    
+    pointsMarketplace.transactions.push(transaction);
+    
+    // Simulate point transfer (in real implementation, this would be on-chain)
+    console.log(`Transaction: ${publicKey} bought ${amount} points from ${selectedOrder.seller} for ${totalCost} SOL`);
+    console.log(`Seller ${selectedOrder.seller} receives ${transaction.sellerReceives} SOL`);
+    
+    res.json({ 
+      success: true, 
+      message: `Successfully purchased ${amount} points`,
+      transaction: transaction,
+      cost: totalCost,
+      pointsReceived: amount,
+      seller: selectedOrder.seller
+    });
+  } catch (e) {
+    console.error('buyPoints error:', e);
+    res.status(500).json({ error: 'Server error', details: e.message });
+  }
+});
+
+// Get marketplace stats
+app.get('/marketplaceStats', (req, res) => {
+  const totalSessions = history.length;
+  const totalPointsDistributed = history.reduce((sum, h) => sum + (h.rewardTokens || 0), 0);
+  const totalEnergy = history.reduce((sum, h) => sum + (h.kwhUsed || 0), 0);
+  
+  const activeSellOrders = pointsMarketplace.sellOrders.filter(order => order.status === 'active');
+  const totalSellVolume = activeSellOrders.reduce((sum, order) => sum + order.amount, 0);
+  const totalTransactions = pointsMarketplace.transactions.length;
+  
+  res.json({
+    totalSessions,
+    totalPointsDistributed,
+    totalEnergy,
+    averagePointsPerSession: totalSessions > 0 ? totalPointsDistributed / totalSessions : 0,
+    marketplace: {
+      activeSellOrders: activeSellOrders.length,
+      totalSellVolume,
+      totalTransactions,
+      averagePrice: 0.015 // Current market price
+    },
+    marketPrice: {
+      basePrice: 0.01, // 1 point = 0.01 SOL (seller gets)
+      buyerPrice: 0.015, // 50% markup for buyers
+      sellerPrice: 0.01 // What seller receives
+    }
+  });
+});
+
+// Get active sell orders
+app.get('/sellOrders', (req, res) => {
+  const activeOrders = pointsMarketplace.sellOrders
+    .filter(order => order.status === 'active')
+    .sort((a, b) => a.timestamp - b.timestamp);
+  
+  res.json({
+    orders: activeOrders.map(order => ({
+      id: order.id,
+      amount: order.amount,
+      price: order.buyerPrice,
+      seller: order.seller.slice(0, 6) + '...' + order.seller.slice(-4),
+      timestamp: order.timestamp
+    }))
+  });
+});
+
+// Get user's marketplace activity
+app.get('/userMarketplace', (req, res) => {
+  const { pubkey } = req.query;
+  if (!pubkey) return res.status(400).json({ error: 'Public key required' });
+  
+  const userSellOrders = pointsMarketplace.sellOrders.filter(order => order.seller === pubkey);
+  const userBuyTransactions = pointsMarketplace.transactions.filter(tx => tx.buyer === pubkey);
+  const userSellTransactions = pointsMarketplace.transactions.filter(tx => tx.seller === pubkey);
+  
+  res.json({
+    sellOrders: userSellOrders,
+    buyTransactions: userBuyTransactions,
+    sellTransactions: userSellTransactions,
+    totalBought: userBuyTransactions.reduce((sum, tx) => sum + tx.amount, 0),
+    totalSold: userSellTransactions.reduce((sum, tx) => sum + tx.amount, 0),
+    totalSpent: userBuyTransactions.reduce((sum, tx) => sum + tx.totalCost, 0),
+    totalEarned: userSellTransactions.reduce((sum, tx) => sum + tx.sellerReceives, 0)
+  });
+});
+
+// -----------------------------
+// Virtual DeCharge Worlds System
+// -----------------------------
+
+// In-memory storage for virtual world (in production, use a database)
+let virtualWorld = {
+  plots: [], // Will be initialized with 64 plots
+  userAssets: {} // { publicKey: { plots: [], chargers: [] } }
+};
+
+// In-memory storage for points marketplace
+let pointsMarketplace = {
+  sellOrders: [], // { seller: publicKey, amount: number, price: number, timestamp: number }
+  buyOrders: [], // { buyer: publicKey, amount: number, price: number, timestamp: number }
+  transactions: [] // { buyer: publicKey, seller: publicKey, amount: number, price: number, timestamp: number }
+};
+
+// Initialize virtual world on startup
+function initializeVirtualWorld() {
+  virtualWorld.plots = [];
+  for (let i = 0; i < 64; i++) {
+    virtualWorld.plots.push({
+      id: i,
+      x: i % 8,
+      y: Math.floor(i / 8),
+      owner: null,
+      hasCharger: false,
+      chargerType: null,
+      price: 50 + Math.floor(Math.random() * 50) // 50-100 points
+    });
+  }
+}
+
+// Get user's virtual world assets
+app.get('/virtualWorld', (req, res) => {
+  const { pubkey } = req.query;
+  if (!pubkey) return res.status(400).json({ error: 'Public key required' });
+  
+  const userAssets = virtualWorld.userAssets[pubkey] || { plots: [], chargers: [] };
+  res.json({
+    userPlots: userAssets.plots,
+    userChargers: userAssets.chargers,
+    availablePlots: virtualWorld.plots.filter(p => !p.owner)
+  });
+});
+
+// Buy virtual plot
+app.post('/buyVirtualPlot', async (req, res) => {
+  try {
+    const { publicKey, plotId, cost } = req.body;
+    if (!publicKey || plotId === undefined || !cost) {
+      return res.status(400).json({ error: 'Invalid parameters' });
+    }
+    
+    const plot = virtualWorld.plots[plotId];
+    if (!plot) return res.status(404).json({ error: 'Plot not found' });
+    
+    if (plot.owner) return res.status(400).json({ error: 'Plot already owned' });
+    
+    // Check if user has enough points
+    const userHistory = history.filter(h => h.publicKey === publicKey);
+    const totalPoints = userHistory.reduce((sum, h) => sum + (h.rewardTokens || 0), 0);
+    
+    if (totalPoints < cost) {
+      return res.status(400).json({ error: 'Insufficient points' });
+    }
+    
+    // Transfer ownership
+    plot.owner = publicKey;
+    
+    // Update user assets
+    if (!virtualWorld.userAssets[publicKey]) {
+      virtualWorld.userAssets[publicKey] = { plots: [], chargers: [] };
+    }
+    virtualWorld.userAssets[publicKey].plots.push(plot);
+    
+    console.log(`User ${publicKey} bought plot ${plotId} for ${cost} points`);
+    
+    res.json({ 
+      success: true, 
+      message: `Successfully bought plot ${plotId}`,
+      plot: plot
+    });
+  } catch (e) {
+    console.error('buyVirtualPlot error:', e);
+    res.status(500).json({ error: 'Server error', details: e.message });
+  }
+});
+
+// Install virtual charger
+app.post('/installVirtualCharger', async (req, res) => {
+  try {
+    const { publicKey, plotId, cost } = req.body;
+    if (!publicKey || plotId === undefined || !cost) {
+      return res.status(400).json({ error: 'Invalid parameters' });
+    }
+    
+    const plot = virtualWorld.plots[plotId];
+    if (!plot) return res.status(404).json({ error: 'Plot not found' });
+    
+    if (plot.owner !== publicKey) {
+      return res.status(400).json({ error: 'You must own this plot' });
+    }
+    
+    if (plot.hasCharger) {
+      return res.status(400).json({ error: 'Plot already has a charger' });
+    }
+    
+    // Check if user has enough points
+    const userHistory = history.filter(h => h.publicKey === publicKey);
+    const totalPoints = userHistory.reduce((sum, h) => sum + (h.rewardTokens || 0), 0);
+    
+    if (totalPoints < cost) {
+      return res.status(400).json({ error: 'Insufficient points' });
+    }
+    
+    // Install charger
+    plot.hasCharger = true;
+    plot.chargerType = 'standard';
+    
+    // Update user assets
+    if (!virtualWorld.userAssets[publicKey]) {
+      virtualWorld.userAssets[publicKey] = { plots: [], chargers: [] };
+    }
+    virtualWorld.userAssets[publicKey].chargers.push(plot);
+    
+    console.log(`User ${publicKey} installed charger on plot ${plotId} for ${cost} points`);
+    
+    res.json({ 
+      success: true, 
+      message: `Successfully installed charger on plot ${plotId}`,
+      plot: plot
+    });
+  } catch (e) {
+    console.error('installVirtualCharger error:', e);
+    res.status(500).json({ error: 'Server error', details: e.message });
+  }
+});
+
+// Get virtual world stats
+app.get('/virtualWorldStats', (req, res) => {
+  const totalPlots = virtualWorld.plots.length;
+  const ownedPlots = virtualWorld.plots.filter(p => p.owner).length;
+  const plotsWithChargers = virtualWorld.plots.filter(p => p.hasCharger).length;
+  
+  res.json({
+    totalPlots,
+    ownedPlots,
+    availablePlots: totalPlots - ownedPlots,
+    plotsWithChargers,
+    ownershipRate: totalPlots > 0 ? (ownedPlots / totalPlots) * 100 : 0
+  });
+});
+
+// -----------------------------
 // Init
 // -----------------------------
 (async function init() {
   try {
     await loadDB();
     await loadServerKeypair();
+    
+    // Initialize virtual world
+    initializeVirtualWorld();
 
     // Resume any charging simulations that were active
     Object.entries(sessions).forEach(([id, s]) => {

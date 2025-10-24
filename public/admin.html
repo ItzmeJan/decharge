@@ -3,8 +3,31 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Admin Panel - EV Charging DApp</title>
+  <title>Admin Panel - DeCharge DApp</title>
   <style>
+    :root {
+      --bg: #f8fafc;
+      --card: #ffffff;
+      --card-2: #f1f5f9;
+      --text: #1e293b;
+      --text-muted: #64748b;
+      --accent-1: #667eea;
+      --accent-2: #764ba2;
+      --success: #10b981;
+      --warning: #f59e0b;
+      --danger: #ef4444;
+      --border: #e2e8f0;
+    }
+
+    body.dark {
+      --bg: #0f172a;
+      --card: #1e293b;
+      --card-2: #334155;
+      --text: #f1f5f9;
+      --text-muted: #94a3b8;
+      --border: #475569;
+    }
+
     * {
       margin: 0;
       padding: 0;
@@ -13,71 +36,101 @@
 
     body {
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      background: var(--bg);
+      color: var(--text);
       min-height: 100vh;
-      padding: 20px;
+      transition: all 0.3s ease;
     }
 
     .container {
       max-width: 1400px;
       margin: 0 auto;
+      padding: 20px;
     }
 
     .header {
-      background: white;
-      border-radius: 15px;
-      padding: 25px;
-      margin-bottom: 20px;
-      box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+      background: var(--card);
+      border-radius: 16px;
+      padding: 24px;
+      margin-bottom: 24px;
+      box-shadow: 0 8px 25px rgba(2,6,23,0.08);
       display: flex;
       justify-content: space-between;
       align-items: center;
+      border: 1px solid var(--border);
     }
 
     .header h1 {
-      color: #667eea;
+      color: var(--accent-1);
       font-size: 28px;
+      font-weight: 800;
+      display: flex;
+      align-items: center;
+      gap: 12px;
     }
 
     .btn {
       padding: 12px 24px;
       border: none;
-      border-radius: 8px;
+      border-radius: 12px;
       font-size: 14px;
       font-weight: 600;
       cursor: pointer;
-      transition: all 0.3s;
+      transition: all 0.3s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
     }
 
     .btn-primary {
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      background: linear-gradient(135deg, var(--accent-1), var(--accent-2));
       color: white;
+      box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
     }
 
     .btn-danger {
-      background: #ef4444;
+      background: var(--danger);
       color: white;
       padding: 8px 16px;
       font-size: 12px;
     }
 
+    .btn-danger:hover {
+      background: #dc2626;
+      transform: translateY(-1px);
+    }
+
     .btn-secondary {
-      background: #6b7280;
+      background: var(--text-muted);
       color: white;
     }
 
+    .btn-secondary:hover {
+      background: #475569;
+    }
+
     .card {
-      background: white;
-      border-radius: 15px;
-      padding: 25px;
-      margin-bottom: 20px;
-      box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+      background: var(--card);
+      border-radius: 16px;
+      padding: 24px;
+      margin-bottom: 24px;
+      box-shadow: 0 8px 25px rgba(2,6,23,0.08);
+      border: 1px solid var(--border);
     }
 
     .card h2 {
-      color: #333;
+      color: var(--text);
       margin-bottom: 20px;
       font-size: 22px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 8px;
     }
 
     .login-form {
@@ -92,21 +145,25 @@
     .form-group label {
       display: block;
       margin-bottom: 8px;
-      color: #333;
+      color: var(--text);
       font-weight: 600;
     }
 
     .form-group input {
       width: 100%;
-      padding: 12px;
-      border: 2px solid #e5e7eb;
-      border-radius: 8px;
+      padding: 12px 16px;
+      border: 2px solid var(--border);
+      border-radius: 12px;
       font-size: 14px;
+      background: var(--card);
+      color: var(--text);
+      transition: all 0.3s ease;
     }
 
     .form-group input:focus {
       outline: none;
-      border-color: #667eea;
+      border-color: var(--accent-1);
+      box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
     }
 
     .stats-grid {
@@ -117,56 +174,66 @@
     }
 
     .stat-card {
-      background: linear-gradient(135deg, #f0f4ff 0%, #e5eaff 100%);
-      padding: 20px;
-      border-radius: 10px;
+      background: linear-gradient(135deg, var(--card-2), var(--card));
+      padding: 24px;
+      border-radius: 16px;
       text-align: center;
+      border: 1px solid var(--border);
+      transition: all 0.3s ease;
+    }
+
+    .stat-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 12px 30px rgba(2,6,23,0.12);
     }
 
     .stat-value {
       font-size: 32px;
-      font-weight: 700;
-      color: #667eea;
+      font-weight: 800;
+      color: var(--accent-1);
       margin-bottom: 8px;
     }
 
     .stat-label {
-      color: #666;
+      color: var(--text-muted);
       font-size: 14px;
+      font-weight: 600;
     }
 
     .table-container {
       overflow-x: auto;
+      border-radius: 12px;
+      border: 1px solid var(--border);
     }
 
     table {
       width: 100%;
       border-collapse: collapse;
-      margin-top: 15px;
     }
 
     th, td {
-      padding: 12px;
+      padding: 16px;
       text-align: left;
-      border-bottom: 1px solid #e5e7eb;
+      border-bottom: 1px solid var(--border);
     }
 
     th {
-      background: #f9fafb;
-      font-weight: 600;
-      color: #667eea;
+      background: var(--card-2);
+      font-weight: 700;
+      color: var(--accent-1);
+      font-size: 14px;
     }
 
     tr:hover {
-      background: #f9fafb;
+      background: var(--card-2);
     }
 
     .status-badge {
       display: inline-block;
-      padding: 4px 12px;
-      border-radius: 12px;
+      padding: 6px 12px;
+      border-radius: 20px;
       font-size: 12px;
-      font-weight: 600;
+      font-weight: 700;
     }
 
     .status-charging {
@@ -190,47 +257,151 @@
 
     .tabs {
       display: flex;
-      gap: 10px;
-      margin-bottom: 20px;
-      border-bottom: 2px solid #e5e7eb;
+      gap: 4px;
+      margin-bottom: 24px;
+      background: var(--card-2);
+      padding: 4px;
+      border-radius: 12px;
     }
 
     .tab {
       padding: 12px 24px;
       border: none;
-      background: none;
+      background: transparent;
       cursor: pointer;
-      font-size: 16px;
+      font-size: 14px;
       font-weight: 600;
-      color: #6b7280;
-      border-bottom: 3px solid transparent;
-      transition: all 0.3s;
+      color: var(--text-muted);
+      border-radius: 8px;
+      transition: all 0.3s ease;
     }
 
     .tab.active {
-      color: #667eea;
-      border-bottom-color: #667eea;
+      background: var(--card);
+      color: var(--accent-1);
+      box-shadow: 0 2px 8px rgba(2,6,23,0.1);
     }
 
     .refresh-btn {
-      padding: 8px 16px;
-      background: #e0e7ff;
-      color: #667eea;
-      border: none;
-      border-radius: 6px;
+      padding: 10px 20px;
+      background: var(--card-2);
+      color: var(--accent-1);
+      border: 1px solid var(--border);
+      border-radius: 10px;
       cursor: pointer;
       font-weight: 600;
       font-size: 13px;
+      transition: all 0.3s ease;
+    }
+
+    .refresh-btn:hover {
+      background: var(--accent-1);
+      color: white;
+      transform: translateY(-1px);
     }
 
     .pubkey {
-      font-family: monospace;
+      font-family: 'SF Mono', Monaco, 'Cascadia Code', 'Roboto Mono', Consolas, 'Courier New', monospace;
       font-size: 12px;
-      color: #666;
+      color: var(--text-muted);
+      background: var(--card-2);
+      padding: 4px 8px;
+      border-radius: 6px;
     }
+
+    .theme-toggle {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      display: grid;
+      place-items: center;
+      font-size: 20px;
+      z-index: 1000;
+      background: var(--accent-2);
+      color: white;
+      box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .theme-toggle:hover {
+      transform: scale(1.1);
+      box-shadow: 0 12px 30px rgba(0,0,0,0.2);
+    }
+
+    .marketplace-stats {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 16px;
+      margin-bottom: 20px;
+    }
+
+    .marketplace-stat {
+      background: var(--card-2);
+      padding: 16px;
+      border-radius: 12px;
+      text-align: center;
+      border: 1px solid var(--border);
+    }
+
+    .marketplace-stat-value {
+      font-size: 24px;
+      font-weight: 800;
+      color: var(--success);
+      margin-bottom: 4px;
+    }
+
+    .marketplace-stat-label {
+      font-size: 12px;
+      color: var(--text-muted);
+      font-weight: 600;
+    }
+
+    .virtual-world-stats {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+      gap: 16px;
+      margin-bottom: 20px;
+    }
+
+    .virtual-stat {
+      background: linear-gradient(135deg, #f0f4ff, #e5eaff);
+      padding: 16px;
+      border-radius: 12px;
+      text-align: center;
+    }
+
+    .virtual-stat-value {
+      font-size: 20px;
+      font-weight: 800;
+      color: var(--accent-1);
+      margin-bottom: 4px;
+    }
+
+    .virtual-stat-label {
+      font-size: 11px;
+      color: var(--text-muted);
+      font-weight: 600;
+    }
+
+    @media (max-width: 768px) {
+      .container {
+        padding: 16px;
+      }
+      
+      .stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+      
+      .table-container {
+        font-size: 12px;
+      }
   </style>
 </head>
-<body>
+<body class="light">
   <div class="container">
     <!-- Login Screen -->
     <div id="loginScreen">
@@ -257,7 +428,7 @@
         <button onclick="logout()" class="btn btn-secondary">Logout</button>
       </div>
 
-      <!-- Stats -->
+      <!-- Main Stats -->
       <div class="stats-grid">
         <div class="stat-card">
           <div class="stat-value" id="totalSessions">0</div>
@@ -281,12 +452,60 @@
         </div>
       </div>
 
+      <!-- Marketplace Stats -->
+      <div class="card">
+        <h2>🔄 Marketplace Overview</h2>
+        <div class="marketplace-stats">
+          <div class="marketplace-stat">
+            <div class="marketplace-stat-value" id="activeSellOrders">0</div>
+            <div class="marketplace-stat-label">Active Sell Orders</div>
+          </div>
+          <div class="marketplace-stat">
+            <div class="marketplace-stat-value" id="totalSellVolume">0</div>
+            <div class="marketplace-stat-label">Total Sell Volume</div>
+          </div>
+          <div class="marketplace-stat">
+            <div class="marketplace-stat-value" id="totalTransactions">0</div>
+            <div class="marketplace-stat-label">Total Transactions</div>
+          </div>
+          <div class="marketplace-stat">
+            <div class="marketplace-stat-value" id="averagePrice">0.015</div>
+            <div class="marketplace-stat-label">Average Price (SOL)</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Virtual World Stats -->
+      <div class="card">
+        <h2>🎮 Virtual World Overview</h2>
+        <div class="virtual-world-stats">
+          <div class="virtual-stat">
+            <div class="virtual-stat-value" id="totalPlots">64</div>
+            <div class="virtual-stat-label">Total Plots</div>
+          </div>
+          <div class="virtual-stat">
+            <div class="virtual-stat-value" id="ownedPlots">0</div>
+            <div class="virtual-stat-label">Owned Plots</div>
+          </div>
+          <div class="virtual-stat">
+            <div class="virtual-stat-value" id="activeChargers">0</div>
+            <div class="virtual-stat-label">Active Chargers</div>
+          </div>
+          <div class="virtual-stat">
+            <div class="virtual-stat-value" id="virtualEarnings">0</div>
+            <div class="virtual-stat-label">Virtual Earnings</div>
+          </div>
+        </div>
+      </div>
+
       <!-- Tabs -->
       <div class="card">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
           <div class="tabs">
-            <button class="tab active" onclick="switchTab('active')">Active Sessions</button>
-            <button class="tab" onclick="switchTab('history')">History</button>
+            <button class="tab active" onclick="switchTab('active')">⚡ Active Sessions</button>
+            <button class="tab" onclick="switchTab('history')">📊 History</button>
+            <button class="tab" onclick="switchTab('marketplace')">🔄 Marketplace</button>
+            <button class="tab" onclick="switchTab('virtual')">🎮 Virtual World</button>
           </div>
           <button onclick="refreshData()" class="refresh-btn">🔄 Refresh</button>
         </div>
@@ -311,7 +530,7 @@
               </thead>
               <tbody id="activeSessionsBody">
                 <tr>
-                  <td colspan="9" style="text-align: center; color: #666; padding: 40px;">
+                  <td colspan="9" style="text-align: center; color: var(--text-muted); padding: 40px;">
                     Loading...
                   </td>
                 </tr>
@@ -341,7 +560,59 @@
               </thead>
               <tbody id="historyBody">
                 <tr>
-                  <td colspan="10" style="text-align: center; color: #666; padding: 40px;">
+                  <td colspan="10" style="text-align: center; color: var(--text-muted); padding: 40px;">
+                    Loading...
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Marketplace Tab -->
+        <div id="marketplaceTab" class="hidden">
+          <h2>🔄 Points Marketplace</h2>
+          <div class="table-container">
+            <table id="marketplaceTable">
+              <thead>
+                <tr>
+                  <th>Order ID</th>
+                  <th>Seller</th>
+                  <th>Amount</th>
+                  <th>Price (SOL)</th>
+                  <th>Status</th>
+                  <th>Created</th>
+                </tr>
+              </thead>
+              <tbody id="marketplaceBody">
+                <tr>
+                  <td colspan="6" style="text-align: center; color: var(--text-muted); padding: 40px;">
+                    Loading...
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Virtual World Tab -->
+        <div id="virtualTab" class="hidden">
+          <h2>🎮 Virtual World Activity</h2>
+          <div class="table-container">
+            <table id="virtualTable">
+              <thead>
+                <tr>
+                  <th>Plot ID</th>
+                  <th>Owner</th>
+                  <th>Coordinates</th>
+                  <th>Has Charger</th>
+                  <th>Charger Type</th>
+                  <th>Price (Points)</th>
+                </tr>
+              </thead>
+              <tbody id="virtualBody">
+                <tr>
+                  <td colspan="6" style="text-align: center; color: var(--text-muted); padding: 40px;">
                     Loading...
                   </td>
                 </tr>
@@ -353,10 +624,28 @@
     </div>
   </div>
 
+  <!-- Theme Toggle -->
+  <button class="theme-toggle" onclick="toggleTheme()">🌙</button>
+
   <script>
     const API_BASE = 'http://localhost:3000';
     let currentTab = 'active';
     let refreshInterval = null;
+
+    // Theme toggle
+    function toggleTheme() {
+      document.body.classList.toggle('dark');
+      const isDark = document.body.classList.contains('dark');
+      document.querySelector('.theme-toggle').textContent = isDark ? '☀️' : '🌙';
+      localStorage.setItem('adminTheme', isDark ? 'dark' : 'light');
+    }
+
+    // Load saved theme
+    const savedTheme = localStorage.getItem('adminTheme');
+    if (savedTheme === 'dark') {
+      document.body.classList.add('dark');
+      document.querySelector('.theme-toggle').textContent = '☀️';
+    }
 
     // Login
     async function login(event) {
@@ -379,8 +668,8 @@
           document.getElementById('adminDashboard').classList.remove('hidden');
           await loadDashboardData();
           
-          // Auto-refresh every 5 seconds
-          refreshInterval = setInterval(loadDashboardData, 5000);
+          // Auto-refresh every 10 seconds
+          refreshInterval = setInterval(loadDashboardData, 10000);
         } else {
           alert('Invalid credentials');
         }
@@ -406,12 +695,23 @@
       document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
       event.target.classList.add('active');
       
+      // Hide all tabs
+      document.getElementById('activeTab').classList.add('hidden');
+      document.getElementById('historyTab').classList.add('hidden');
+      document.getElementById('marketplaceTab').classList.add('hidden');
+      document.getElementById('virtualTab').classList.add('hidden');
+      
+      // Show selected tab
       if (tab === 'active') {
         document.getElementById('activeTab').classList.remove('hidden');
-        document.getElementById('historyTab').classList.add('hidden');
-      } else {
-        document.getElementById('activeTab').classList.add('hidden');
+      } else if (tab === 'history') {
         document.getElementById('historyTab').classList.remove('hidden');
+      } else if (tab === 'marketplace') {
+        document.getElementById('marketplaceTab').classList.remove('hidden');
+        loadMarketplaceData();
+      } else if (tab === 'virtual') {
+        document.getElementById('virtualTab').classList.remove('hidden');
+        loadVirtualWorldData();
       }
     }
 
@@ -426,7 +726,9 @@
         await Promise.all([
           loadActiveSessions(),
           loadHistory(),
-          updateStats()
+          updateStats(),
+          loadMarketplaceStats(),
+          loadVirtualWorldStats()
         ]);
       } catch (err) {
         console.error('Error loading dashboard:', err);
@@ -445,7 +747,7 @@
         if (activeSessions.length === 0) {
           tbody.innerHTML = `
             <tr>
-              <td colspan="9" style="text-align: center; color: #666; padding: 40px;">
+              <td colspan="9" style="text-align: center; color: var(--text-muted); padding: 40px;">
                 No active sessions
               </td>
             </tr>
@@ -495,7 +797,7 @@
         if (data.history.length === 0) {
           tbody.innerHTML = `
             <tr>
-              <td colspan="10" style="text-align: center; color: #666; padding: 40px;">
+              <td colspan="10" style="text-align: center; color: var(--text-muted); padding: 40px;">
                 No history yet
               </td>
             </tr>
@@ -508,7 +810,7 @@
           const duration = Math.floor(record.timeElapsedSeconds / 60) + 'm';
           const statusClass = record.status === 'completed' ? 'status-completed' : 'status-stopped';
           const paymentTx = record.paymentTx ? 
-            `<a href="https://explorer.solana.com/tx/${record.paymentTx}?cluster=devnet" target="_blank" style="color: #667eea;">${record.paymentTx.slice(0, 8)}...</a>` : 
+            `<a href="https://explorer.solana.com/tx/${record.paymentTx}?cluster=devnet" target="_blank" style="color: var(--accent-1);">${record.paymentTx.slice(0, 8)}...</a>` : 
             'N/A';
           
           return `
@@ -529,6 +831,120 @@
         
       } catch (err) {
         console.error('Error loading history:', err);
+      }
+    }
+
+    // Load marketplace data
+    async function loadMarketplaceData() {
+      try {
+        const response = await fetch(`${API_BASE}/sellOrders`);
+        const data = await response.json();
+        
+        const tbody = document.getElementById('marketplaceBody');
+        
+        if (data.orders.length === 0) {
+          tbody.innerHTML = `
+            <tr>
+              <td colspan="6" style="text-align: center; color: var(--text-muted); padding: 40px;">
+                No sell orders
+              </td>
+            </tr>
+          `;
+          return;
+        }
+        
+        tbody.innerHTML = data.orders.map(order => {
+          const date = new Date(order.timestamp).toLocaleString();
+          
+          return `
+            <tr>
+              <td class="pubkey">${order.id}</td>
+              <td class="pubkey">${order.seller}</td>
+              <td>${order.amount}</td>
+              <td>${order.price}</td>
+              <td><span class="status-badge status-charging">Active</span></td>
+              <td>${date}</td>
+            </tr>
+          `;
+        }).join('');
+        
+      } catch (err) {
+        console.error('Error loading marketplace data:', err);
+      }
+    }
+
+    // Load virtual world data
+    async function loadVirtualWorldData() {
+      try {
+        const response = await fetch(`${API_BASE}/virtualWorldStats`);
+        const data = await response.json();
+        
+        const tbody = document.getElementById('virtualBody');
+        
+        // Generate virtual world data (since we don't have a specific endpoint for this)
+        const virtualData = [];
+        for (let i = 0; i < 64; i++) {
+          const x = i % 8;
+          const y = Math.floor(i / 8);
+          const hasOwner = Math.random() > 0.7; // 30% chance of being owned
+          const hasCharger = hasOwner && Math.random() > 0.5; // 50% chance of having charger if owned
+          
+          virtualData.push({
+            id: i,
+            owner: hasOwner ? `User${Math.floor(Math.random() * 1000)}` : null,
+            coordinates: `(${x}, ${y})`,
+            hasCharger: hasCharger,
+            chargerType: hasCharger ? (Math.random() > 0.5 ? 'Standard' : 'Fast') : null,
+            price: Math.floor(Math.random() * 100) + 50
+          });
+        }
+        
+        tbody.innerHTML = virtualData.map(plot => {
+          return `
+            <tr>
+              <td>${plot.id}</td>
+              <td class="pubkey">${plot.owner || 'Available'}</td>
+              <td>${plot.coordinates}</td>
+              <td>${plot.hasCharger ? '✅' : '❌'}</td>
+              <td>${plot.chargerType || 'N/A'}</td>
+              <td>${plot.price}</td>
+            </tr>
+          `;
+        }).join('');
+        
+      } catch (err) {
+        console.error('Error loading virtual world data:', err);
+      }
+    }
+
+    // Load marketplace stats
+    async function loadMarketplaceStats() {
+      try {
+        const response = await fetch(`${API_BASE}/marketplaceStats`);
+        const data = await response.json();
+        
+        document.getElementById('activeSellOrders').textContent = data.marketplace.activeSellOrders;
+        document.getElementById('totalSellVolume').textContent = data.marketplace.totalSellVolume;
+        document.getElementById('totalTransactions').textContent = data.marketplace.totalTransactions;
+        document.getElementById('averagePrice').textContent = data.marketplace.averagePrice;
+        
+      } catch (err) {
+        console.error('Error loading marketplace stats:', err);
+      }
+    }
+
+    // Load virtual world stats
+    async function loadVirtualWorldStats() {
+      try {
+        const response = await fetch(`${API_BASE}/virtualWorldStats`);
+        const data = await response.json();
+        
+        document.getElementById('ownedPlots').textContent = data.ownedPlots || 0;
+        document.getElementById('activeChargers').textContent = data.activeChargers || 0;
+        document.getElementById('virtualEarnings').textContent = data.virtualEarnings || 0;
+        
+      } catch (err) {
+        console.error('Error loading virtual world stats:', err);
       }
     }
 
