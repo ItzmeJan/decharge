@@ -397,6 +397,59 @@
       display:block;
       z-index:150;
     }
+    
+    /* Fix mobile blur issues */
+    .sheet { 
+      filter: none !important; /* Remove blur on mobile */
+      backdrop-filter: none !important;
+    }
+    
+    /* Remove blur effects on mobile for better performance */
+    .page-section {
+      filter: none !important;
+    }
+    
+    /* Simplify animations on mobile */
+    .station {
+      transition: transform 0.2s ease;
+    }
+    .station:hover {
+      transform: translateY(-4px) scale(1.01);
+    }
+    
+    /* Fix mobile panel blur issues */
+    .panel {
+      filter: none !important;
+    }
+    
+    /* Ensure station details are visible on mobile */
+    .station-details {
+      filter: none !important;
+      backdrop-filter: none !important;
+    }
+    
+    /* Fix overlay blur on mobile */
+    .overlay {
+      backdrop-filter: none !important;
+    }
+    
+    /* Quick mobile touch fixes */
+    .sheet {
+      z-index: 999 !important;
+      pointer-events: auto !important;
+    }
+    
+    .sheet .btn, .sheet .connector-action {
+      pointer-events: auto !important;
+      touch-action: manipulation !important;
+      -webkit-tap-highlight-color: rgba(0,0,0,0.1) !important;
+    }
+    
+    .theme-toggle {
+      z-index: 1000 !important;
+      pointer-events: auto !important;
+      touch-action: manipulation !important;
+    }
   }
 
   @media (min-width:901px){
@@ -1628,6 +1681,23 @@ window.addEventListener('load', async ()=>{
 });
 
 /* Sidebar is now always visible, no resize handling needed */
+
+/* Quick mobile touch fix */
+document.addEventListener('DOMContentLoaded', function() {
+  // Fix mobile touch events
+  document.addEventListener('touchstart', function(e) {
+    if (e.target.closest('.sheet')) {
+      e.target.closest('.sheet').style.pointerEvents = 'auto';
+    }
+  }, { passive: true });
+  
+  // Ensure buttons work on mobile
+  document.addEventListener('touchend', function(e) {
+    if (e.target.classList.contains('btn') || e.target.classList.contains('connector-action')) {
+      e.target.click();
+    }
+  }, { passive: true });
+});
 
 </script>
 </body>
